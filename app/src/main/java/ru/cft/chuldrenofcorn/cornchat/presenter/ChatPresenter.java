@@ -30,7 +30,7 @@ public class ChatPresenter {
     }
 
     public void sendMessage(final String messageText) {
-        messages.add(new ChatMessage("vasya", messageText, new Date(), true));
+        messages.add(0, new ChatMessage("vasya", messageText, new Date(), true));
         chatAdapter.setMessages(messages);
     }
 }

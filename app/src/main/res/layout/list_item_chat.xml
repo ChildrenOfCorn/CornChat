@@ -4,10 +4,17 @@
     android:id="@+id/linearLayoutMessageContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="4dp"
     android:paddingLeft="4dp"
     android:paddingRight="4dp">
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:id="@+id/imageViewAvatar"
+        android:background="#000000"
+        android:layout_gravity="center_vertical"/>
 
     <LinearLayout
         android:id="@+id/linearLayoutBubble"
@@ -53,5 +60,4 @@
             android:paddingLeft="8dp"
             android:textSize="12sp" />
     </LinearLayout>
-
 </LinearLayout>
