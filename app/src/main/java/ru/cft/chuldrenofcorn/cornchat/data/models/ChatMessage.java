@@ -27,7 +27,7 @@ public class ChatMessage {
     @DatabaseField(canBeNull = false, dataType = DataType.INTEGER, columnName = ID, id = true)
     @Getter
     @Setter
-    private long id;
+    private int id;
 
     @DatabaseField(dataType = DataType.STRING, columnName = SENDER_NAME)
     @Getter
@@ -53,6 +53,9 @@ public class ChatMessage {
     @Getter
     @Setter
     private boolean isLocal; //если true - сообщение написал пользователь, если false - пришло из вне
+
+    public ChatMessage() {
+    }
 
     public ChatMessage(final String senderName, final String text, final Date date, boolean isLocal) {
         this.senderName = senderName;

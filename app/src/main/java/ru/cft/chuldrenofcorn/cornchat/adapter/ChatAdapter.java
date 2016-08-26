@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ru.cft.chuldrenofcorn.cornchat.R;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
@@ -21,7 +22,7 @@ import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private Context context;
-    private ArrayList<ChatMessage> messages = new ArrayList<>(10);
+    private List<ChatMessage> messages = new ArrayList<>(10);
 
     public ChatAdapter(final Context context) {
         this.context = context;
@@ -43,7 +44,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         return messages.size();
     }
 
-    public void setMessages(final ArrayList<ChatMessage> messages) {
+    public void setMessages(final List<ChatMessage> messages) {
         this.messages = messages;
         notifyDataSetChanged();
     }

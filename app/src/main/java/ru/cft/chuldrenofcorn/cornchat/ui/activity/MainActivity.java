@@ -13,82 +13,64 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+
+import com.arellomobile.mvp.presenter.InjectPresenter;
+
+import java.util.List;
+
 import ru.cft.chuldrenofcorn.cornchat.R;
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
-import ru.cft.chuldrenofcorn.cornchat.presenter.ChatPresenter;
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
+import ru.cft.chuldrenofcorn.cornchat.mvp.presenter.ChatPresenter;
+import ru.cft.chuldrenofcorn.cornchat.mvp.view.ChatView;
+import ru.cft.chuldrenofcorn.cornchat.ui.common.BaseActivity;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.ChatService;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.LocalBinder;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity implements ChatView {
 
-	private static final String TAG = "MainActivity";
-	private final ChatPresenter presenter = new ChatPresenter(this);
-	private ChatAdapter messageAdapter;
-	private boolean mBounded;
-	private ChatService mService;
+    private static final String TAG = "MainActivity";
 
-	private final ServiceConnection mConnection = new ServiceConnection() {
+    @InjectPresenter
+    ChatPresenter presenter;
 
-		@SuppressWarnings("unchecked")
-		@Override
-		public void onServiceConnected(final ComponentName name,
-									   final IBinder service) {
-			mService = ((LocalBinder<ChatService>) service).getService();
-			mBounded = true;
-			Log.d(TAG, "onServiceConnected");
-		}
+    private ChatAdapter adapter;
 
-		@Override
-		public void onServiceDisconnected(final ComponentName name) {
-			mService = null;
-			mBounded = false;
-			Log.d(TAG, "onServiceDisconnected");
-		}
-	};
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        initViews();
+    }
 
-	@Override
-	protected void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		doBindService();
-		initViews();
-	}
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		doUnbindService();
-	}
+    private void initViews() {
+        final ImageButton imageButtonSend = (ImageButton) findViewById(R.id.imageButtonSend);
+        final EditText editTextMessage = (EditText) findViewById(R.id.editTextMessage);
+        final RecyclerView recyclerViewMessages = (RecyclerView) findViewById(R.id.recyclerViewMessages);
 
-	void doBindService() {
-		bindService(new Intent(this, ChatService.class), mConnection,
-				Context.BIND_AUTO_CREATE);
-	}
+        adapter = new ChatAdapter(this);
+        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerViewMessages.setLayoutManager(linearLayoutManager);
+        recyclerViewMessages.setAdapter(adapter);
 
-	void doUnbindService() {
-		if (mConnection != null) {
-			unbindService(mConnection);
-		}
-	}
+        imageButtonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                if (!editTextMessage.getText().toString().isEmpty()) {
+                    presenter.sendMessage(editTextMessage.getText().toString());
+                }
+            }
+        });
+    }
 
-
-	private void initViews() {
-		final ImageButton imageButtonSend = (ImageButton) findViewById(R.id.imageButtonSend);
-		final EditText editTextMessage = (EditText) findViewById(R.id.editTextMessage);
-		final RecyclerView recyclerViewMessages = (RecyclerView) findViewById(R.id.recyclerViewMessages);
-
-		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-		linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-		recyclerViewMessages.setLayoutManager(linearLayoutManager);
-		recyclerViewMessages.setAdapter(presenter.getChatAdapter());
-
-		imageButtonSend.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View view) {
-				if (!editTextMessage.getText().toString().isEmpty()) {
-					presenter.sendMessage(editTextMessage.getText().toString());
-				}
-			}
-		});
-	}
+    @Override
+    public void onDataReady(final List<ChatMessage> messages) {
+        adapter.setMessages(messages);
+    }
 }
