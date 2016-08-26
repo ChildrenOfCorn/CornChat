@@ -16,7 +16,8 @@
         android:background="@drawable/ic_outcoming"
         android:orientation="vertical"
         android:padding="4dp"
-        tools:ignore="UselessParent">
+        tools:ignore="UselessParent"
+        >
 
         <TextView
             android:layout_width="wrap_content"
