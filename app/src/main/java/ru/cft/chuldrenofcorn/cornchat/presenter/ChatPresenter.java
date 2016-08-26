@@ -15,7 +15,7 @@ import ru.cft.chuldrenofcorn.cornchat.xmpp.MessageConsumer;
  * Date: 26.08.2016
  * Time: 20:18
  */
-public class ChatPresenter {
+public class ChatPresenter implements ChatMessageListener {
 
     private static final int MESSAGE_LIST_EXPECTED_SIZE = 10;
     private final Context context;
@@ -25,6 +25,9 @@ public class ChatPresenter {
 
     public ChatPresenter(final Context context) {
         this.context = context;
+
+        messageHandler = new XmppMessageHandler();
+        messageHandler.setListener(this);
 
         messages = new ArrayList<>(MESSAGE_LIST_EXPECTED_SIZE);
         chatAdapter = new ChatAdapter(context);
@@ -37,5 +40,10 @@ public class ChatPresenter {
     public void sendMessage(final String messageText) {
         messages.add(new ChatMessage("vasya", messageText, new Date(), true));
         chatAdapter.setMessages(messages);
+    }
+
+    @Override
+    public void onNewMessage(final ChatMessage internalMessage) {
+        sendMessage(internalMessage.getText());
     }
 }

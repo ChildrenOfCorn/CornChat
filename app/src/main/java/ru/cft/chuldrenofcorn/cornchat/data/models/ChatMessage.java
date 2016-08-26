@@ -8,67 +8,65 @@ import java.util.Date;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * User: azhukov
  * Date: 26.08.2016
  * Time: 14:35
  */
+@ToString
 @DatabaseTable(tableName = "chatMessages")
 public class ChatMessage {
 
     public static final String ID = "id";
-    public static final String USER_ID = "userId";
-    public static final String SENDER_NAME = "senderName";
-    public static final String TEXT = "text";
+    public static final String SENDER_ID = "senderId";
+    public static final String RECEIVER_ID = "receiverId";
+    public static final String SERVICE_NAME = "serviceName";
+    public static final String PAYLOAD = "text";
     public static final String DATE = "date";
-    public static final String IS_LOCAL = "isLocal";
 
-    //Message format:
-    //"Date":"8 Jul 2016","Time":"0:40p.m.","body":" vhklv","isMine":true,"msgid":"909-08","receiver":"rajesh2","sender":"rajesh1","senderName":"rajesh1"
+    private static final int PAYLOAD_TYPE_MESSAGE = 100;
+    private static final int PAYLOAD_TYPE_SERVICE = 101;
 
     @DatabaseField(canBeNull = false, dataType = DataType.INTEGER, columnName = ID, id = true)
     @Getter
-    @Setter
-    private int id;
+    private int Id;
 
-    @DatabaseField(dataType = DataType.STRING, columnName = SENDER_NAME)
     @Getter
-    @Setter
-    private String senderName;
+    private int messageType;
 
-    @DatabaseField(dataType = DataType.STRING, columnName = USER_ID)
+    @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = SERVICE_NAME)
     @Getter
-    @Setter
-    private String userId;
+    private String serviceUserName;
 
-    @DatabaseField(dataType = DataType.STRING, columnName = TEXT)
+    @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = SENDER_ID)
     @Getter
-    @Setter
-    private String text;
+    private String senderId;
 
-    @DatabaseField(dataType = DataType.DATE, columnName = DATE)
+    @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = RECEIVER_ID)
     @Getter
-    @Setter
+    private String receiverId;
+
+    @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = PAYLOAD)
+    @Getter
+    private String payload;
+
+    @DatabaseField(canBeNull = false, dataType = DataType.DATE, columnName = DATE)
+    @Getter
     private Date date;
-
-    @DatabaseField(dataType = DataType.BOOLEAN, columnName = IS_LOCAL)
-    @Getter
-    @Setter
-    private boolean isLocal; //если true - сообщение написал пользователь, если false - пришло из вне
 
     public ChatMessage() {
     }
 
-    public ChatMessage(final String senderName, final String text, final Date date, boolean isLocal) {
-        this.senderName = senderName;
-        this.text = text;
+    private ChatMessage(final String senderId, final String receiverId, final String payload, final Date date, final int payloadType) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
+        this.payload = payload;
         this.date = date;
-        this.isLocal = isLocal;
+        this.messageType = payloadType;
     }
-
-    @Override
-    public String toString() {
-        return text;
+    public static ChatMessage buildMessage(final String senderId, final String receiverId, final String payload, final Date date) {
+        return new ChatMessage(senderId, receiverId, payload, date, PAYLOAD_TYPE_MESSAGE);
     }
 }
