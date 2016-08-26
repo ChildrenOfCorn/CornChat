@@ -122,7 +122,6 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
                     }
 
                     ChatMessage chatMessage = ChatMessage.buildMessage(getLocalId(), null, messageText, new Date());
-
                     // добавить новое сообщение в бд
                     dao.add(chatMessage, getLocalId());
                     // вернуть выборку из бд с новым сообщением
