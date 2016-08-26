@@ -17,9 +17,6 @@ import com.arellomobile.mvp.MvpDelegate;
  */
 public abstract class BaseActivity extends AppCompatActivity {
     private MvpDelegate<? extends BaseActivity> mMvpDelegate;
-    public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
-
-    private IntentFilter intentFilter;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -65,62 +62,5 @@ public abstract class BaseActivity extends AppCompatActivity {
             mMvpDelegate = new MvpDelegate<>(this);
         }
         return mMvpDelegate;
-    }
-
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            onReceivedNotification(intent);
-            abortBroadcast();
-        }
-    };
-
-    /**
-     * Обработка нотификаций
-     *
-     * @param intent интент, содержащий данный о событии
-     */
-    protected void onReceivedNotification(Intent intent) {
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //registerReceiver(receiver, intentFilter);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //unregisterReceiver(receiver);
-    }
-
-    /**
-     * Отобразить диалог выбора контакта
-     */
-    protected void checkContactPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
-            return;
-        }
-        onPermissionGranted();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted
-                onPermissionGranted();
-                return;
-            }
-        }
-    }
-
-    protected void onPermissionGranted() {
-
     }
 }

@@ -11,6 +11,8 @@ import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
 import com.google.gson.Gson;
 import com.j256.ormlite.dao.Dao;
+
+import ru.cft.chuldrenofcorn.cornchat.App;
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
 import ru.cft.chuldrenofcorn.cornchat.common.Config;
 import ru.cft.chuldrenofcorn.cornchat.common.MockObjectBuilder;
@@ -40,14 +42,13 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
 
     private ChatAdapter chatAdapter;
     private ChatService service;
-    private Context context;
+    private Context context = App.getAppContext();
     private boolean isBounded;
 
     private static final Gson gson = new Gson();
 
-    public ChatPresenter(final Context context) {
+    public ChatPresenter() {
         Log.d(TAG, "ChatPresenter: ");
-        this.context = context;
         //Инициализация БД, TODO: вынести в даггер
         final DatabaseHelper databaseHelper = new DatabaseHelper(context);
         dao = null;

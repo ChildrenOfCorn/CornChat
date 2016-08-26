@@ -12,10 +12,15 @@ public class App extends Application {
     private static final String TAG = App.class.getSimpleName();
 
     private static ChatPresenter presenter;
+    private static Context sContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        presenter = new ChatPresenter(getApplicationContext());
+        sContext = getAppContext();
+    }
+
+    public static Context getAppContext() {
+        return sContext;
     }
 }
