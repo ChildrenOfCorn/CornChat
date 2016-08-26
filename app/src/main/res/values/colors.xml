@@ -5,6 +5,5 @@
     <color name="primaryLight">#B5D900</color>
     <color name="accent">#8CC207</color>
     <color name="whiteBackground">#FFF</color>
-    <color name="purple400">#8CC207</color>
-    <color name="purple100">#B5D900</color>
+    <color name="lightGrayBackground">#F5F5F5</color>
 </resources>

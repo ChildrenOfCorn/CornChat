@@ -11,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -58,6 +59,20 @@ public class MainActivity extends BaseActivity implements ChatView {
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerViewMessages.setLayoutManager(linearLayoutManager);
         recyclerViewMessages.setAdapter(adapter);
+
+		recyclerViewMessages.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(final RecyclerView recyclerView, final int newState) {
+				super.onScrollStateChanged(recyclerView, newState);
+				Log.d(TAG, "onScrollStateChanged()");
+				View view = MainActivity.this.getCurrentFocus();
+				if (view != null) {
+					InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+					inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+				}
+
+			}
+		});
 
         imageButtonSend.setOnClickListener(new View.OnClickListener() {
             @Override

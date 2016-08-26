@@ -70,9 +70,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
                 textViewName.setText(chatMessage.getSenderName());
 
-                textViewName.setTextColor(context.getResources().getColor(R.color.purple100));
+                textViewName.setTextColor(context.getResources().getColor(R.color.primaryLight));
+                textViewDate.setTextColor(context.getResources().getColor(R.color.primaryLight));
                 textViewMessage.setTextColor(Color.BLACK);
-                textViewDate.setTextColor(context.getResources().getColor(R.color.purple400));
 
                 layoutParams.gravity = Gravity.END;
                 textViewDate.setLayoutParams(layoutParams);
@@ -83,9 +83,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
                 textViewName.setText(chatMessage.getSenderName());
 
-                textViewName.setTextColor(context.getResources().getColor(R.color.purple100));
+                textViewName.setTextColor(context.getResources().getColor(R.color.primaryDark));
+                textViewDate.setTextColor(context.getResources().getColor(R.color.primaryDark));
                 textViewMessage.setTextColor(Color.WHITE);
-                textViewDate.setTextColor(context.getResources().getColor(R.color.purple100));
 
                 layoutParams.gravity = Gravity.START;
                 textViewDate.setLayoutParams(layoutParams);
