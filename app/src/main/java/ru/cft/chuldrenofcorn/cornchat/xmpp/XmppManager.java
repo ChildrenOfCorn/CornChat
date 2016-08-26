@@ -3,7 +3,9 @@ package ru.cft.chuldrenofcorn.cornchat.xmpp;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+
 import com.google.gson.Gson;
+
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SASLAuthentication;
@@ -21,9 +23,10 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager.AutoReceiptMode;
 import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
-import ru.cft.chuldrenofcorn.cornchat.dto.ChatMessage;
 
 import java.io.IOException;
+
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 /**
  * User: asmoljak
@@ -32,283 +35,275 @@ import java.io.IOException;
  */
 public class XmppManager {
 
-	private static boolean connected = false;
-	private boolean loggedin = false;
-	private boolean isConnecting = false;
-	private XMPPTCPConnection connection;
-	private String loginUser;
-	private String loginPassword;
-	private String serverAddress;
-	private Gson gson;
-	private ChatService context;
-	private static XmppManager instance = null;
-	private Chat chat;
+    private static final String TAG = XmppManager.class.getSimpleName();
+    private static boolean connected = false;
+    private boolean loggedin = false;
+    private boolean isConnecting = false;
+    private XMPPTCPConnection connection;
+    private String loginUser;
+    private String loginPassword;
+    private String serverAddress;
+    private Gson gson;
+    private ChatService context;
+    private static XmppManager instance = null;
+    private Chat chat;
+    private MessageConsumer messageConsumer;
 
-	public XmppManager(final ChatService context,
-					   final String serverAdress,
-					   final int serverPort,
-					   final String loginUser,
-					   final String loginPassword) {
-		this.loginUser = loginUser;
-		this.loginPassword = loginPassword;
-		this.serverAddress = serverAdress;
-		gson = new Gson();
-		mMessageListener = new MMessageListener(context);
-		mChatManagerListener = new ChatManagerListenerImpl();
-		initialiseConnection(serverAdress, serverPort);
-	}
+    public XmppManager(final ChatService context,
+                       final String serverAdress,
+                       final int serverPort,
+                       final String loginUser,
+                       final String loginPassword,
+                       final MessageConsumer consumer) {
 
-	public static XmppManager getInstance(final ChatService context,
-										  final String server,
-										  final int port,
-										  final String user,
-										  final String pass) {
+        this.loginUser = loginUser;
+        this.loginPassword = loginPassword;
+        this.serverAddress = serverAdress;
+        this.messageConsumer = consumer;
+        gson = new Gson();
+        mMessageListener = new MMessageListener(context);
+        mChatManagerListener = new ChatManagerListenerImpl();
+        initialiseConnection(serverAdress, serverPort);
+    }
 
-		if (instance == null) {
-			instance = new XmppManager(context, server, port, user, pass);
-		}
-		return instance;
+    public static XmppManager getInstance(final ChatService context,
+                                          final String server,
+                                          final int port,
+                                          final String user,
+                                          final String pass,
+                                          final MessageConsumer consumer) {
 
-	}
+        if (instance == null) {
+            instance = new XmppManager(context, server, port, user, pass, consumer);
+        }
+        return instance;
+    }
 
+    private ChatManagerListenerImpl mChatManagerListener;
+    private MMessageListener mMessageListener;
 
-	private ChatManagerListenerImpl mChatManagerListener;
-	private MMessageListener mMessageListener;
+    private String text = "";
+    private String mMessage = "", mReceiver = "";
 
-	private String text = "";
-	private String mMessage = "", mReceiver = "";
+    static {
+        try {
+            Class.forName("org.jivesoftware.smack.ReconnectionManager");
+        } catch (final ClassNotFoundException ex) {
+            // problem loading reconnection manager
+        }
+    }
 
-	static {
-		try {
-			Class.forName("org.jivesoftware.smack.ReconnectionManager");
-		} catch (final ClassNotFoundException ex) {
-			// problem loading reconnection manager
-		}
-	}
+    private void initialiseConnection(final String serverAddress, final int serverPort) {
 
-	private void initialiseConnection(final String serverAddress, final int serverPort) {
+        final XMPPTCPConnectionConfiguration.Builder config = XMPPTCPConnectionConfiguration
+                .builder();
+        config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+        config.setServiceName(serverAddress);
+        config.setHost(serverAddress);
+        config.setPort(serverPort);
+        config.setDebuggerEnabled(true);
+        XMPPTCPConnection.setUseStreamManagementResumptiodDefault(true);
+        XMPPTCPConnection.setUseStreamManagementDefault(true);
 
-		final XMPPTCPConnectionConfiguration.Builder config = XMPPTCPConnectionConfiguration
-				.builder();
-		config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
-		config.setServiceName(serverAddress);
-		config.setHost(serverAddress);
-		config.setPort(serverPort);
-		config.setDebuggerEnabled(true);
-		XMPPTCPConnection.setUseStreamManagementResumptiodDefault(true);
-		XMPPTCPConnection.setUseStreamManagementDefault(true);
+        connection = new XMPPTCPConnection(config.build());
 
+        final XMPPConnectionListener connectionListener = new XMPPConnectionListener();
+        connection.addConnectionListener(connectionListener);
+    }
 
-		connection = new XMPPTCPConnection(config.build());
+    public void disconnect() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                connection.disconnect();
+            }
+        }).start();
+    }
 
-		final XMPPConnectionListener connectionListener = new XMPPConnectionListener();
-		connection.addConnectionListener(connectionListener);
-	}
+    public void connect(final String caller) {
 
-	public void disconnect() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				connection.disconnect();
-			}
-		}).start();
-	}
+        final AsyncTask<Void, Void, Boolean> connectionThread = new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(final Void... arg0) {
+                if (connection.isConnected()) {
+                    return false;
+                }
+                isConnecting = true;
+                Log.d("Connect() Function", caller + "=>connecting....");
 
-	public void connect(final String caller) {
+                try {
+                    connection.connect();
+                    final DeliveryReceiptManager dm = DeliveryReceiptManager
+                            .getInstanceFor(connection);
+                    dm.setAutoReceiptMode(AutoReceiptMode.always);
+                    dm.addReceiptReceivedListener(new ReceiptReceivedListener() {
 
-		final AsyncTask<Void, Void, Boolean> connectionThread = new AsyncTask<Void, Void, Boolean>() {
-			@Override
-			protected Boolean doInBackground(final Void... arg0) {
-				if (connection.isConnected()) {
-					return false;
-				}
-				isConnecting = true;
-				Log.d("Connect() Function", caller + "=>connecting....");
+                        @Override
+                        public void onReceiptReceived(final String fromid,
+                                                      final String toid, final String msgid,
+                                                      final Stanza packet) {
 
-				try {
-					connection.connect();
-					final DeliveryReceiptManager dm = DeliveryReceiptManager
-							.getInstanceFor(connection);
-					dm.setAutoReceiptMode(AutoReceiptMode.always);
-					dm.addReceiptReceivedListener(new ReceiptReceivedListener() {
+                        }
+                    });
+                    connected = true;
+                } catch (final IOException e) {
+                    Log.e("(" + caller + ")", "IOException: " + e.getMessage());
+                } catch (final SmackException e) {
+                    Log.e("(" + caller + ")",
+                            "SMACKException: " + e.getMessage());
+                } catch (final XMPPException e) {
+                    Log.e("connect(" + caller + ")",
+                            "XMPPException: " + e.getMessage());
+                }
 
-						@Override
-						public void onReceiptReceived(final String fromid,
-													  final String toid, final String msgid,
-													  final Stanza packet) {
+                isConnecting = false;
+                return false;
+            }
+        };
+        connectionThread.execute();
+    }
 
-						}
-					});
-					connected = true;
+    public void login() {
 
-				} catch (final IOException e) {
-					Log.e("(" + caller + ")", "IOException: " + e.getMessage());
-				} catch (final SmackException e) {
-					Log.e("(" + caller + ")",
-							"SMACKException: " + e.getMessage());
-				} catch (final XMPPException e) {
-					Log.e("connect(" + caller + ")",
-							"XMPPException: " + e.getMessage());
+        try {
+            SASLAuthentication.unBlacklistSASLMechanism("PLAIN");
+            SASLAuthentication.blacklistSASLMechanism("DIGEST-MD5");
+            connection.login(loginUser, loginPassword);
+            Log.i("LOGIN", "Yey! We're connected to the Xmpp server!");
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-				}
+    private class ChatManagerListenerImpl implements ChatManagerListener {
 
-				isConnecting = false;
-				return false;
-			}
-		};
-		connectionThread.execute();
-	}
+        @Override
+        public void chatCreated(final org.jivesoftware.smack.chat.Chat chat,
+                                final boolean createdLocally) {
+            if (!createdLocally) {
+                chat.addMessageListener(mMessageListener);
+            }
+        }
+    }
 
-	public void login() {
+    public void sendMessage(final ChatMessage chatMessage) {
+        final String body = gson.toJson(chatMessage);
 
-		try {
-			SASLAuthentication.unBlacklistSASLMechanism("PLAIN");
-			SASLAuthentication.blacklistSASLMechanism("DIGEST-MD5");
-			connection.login(loginUser, loginPassword);
-			Log.i("LOGIN", "Yey! We're connected to the Xmpp server!");
+        if (chat == null) {
+            chat = ChatManager.getInstanceFor(connection).createChat(
+                    chatMessage.getUserId() + "@"
+                            + serverAddress,
+                    mMessageListener);
+        }
 
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
+        final Message message = new Message();
+        message.setBody(body);
+        message.setStanzaId(String.valueOf(chatMessage.getId()));
+        message.setType(Message.Type.chat);
 
-	}
+        try {
+            if (connection.isAuthenticated()) {
+                chat.sendMessage(message);
+            } else {
+                login();
+            }
+        } catch (final SmackException.NotConnectedException exception) {
+            //TODO: Handle me
+            Log.e(TAG, "msg Not sent!-Not Connected!", exception);
+        } catch (final Exception exception) {
+            Log.wtf(TAG, "xmpp.SendMessage()-Exception", exception);
+        }
+    }
 
-	private class ChatManagerListenerImpl implements ChatManagerListener {
+    public class XMPPConnectionListener implements ConnectionListener {
 
-		@Override
-		public void chatCreated(final org.jivesoftware.smack.chat.Chat chat,
-								final boolean createdLocally) {
-			if (!createdLocally) {
-				chat.addMessageListener(mMessageListener);
-			}
+        @Override
+        public void connected(final XMPPConnection connection) {
 
-		}
+            Log.d("xmpp", "Connected!");
+            connected = true;
+            if (!connection.isAuthenticated()) {
+                login();
+            }
+        }
 
-	}
+        @Override
+        public void connectionClosed() {
+            Log.d("xmpp", "ConnectionCLosed!");
+            connected = false;
+            chat = null;
+            loggedin = false;
+        }
 
-	public void sendMessage(final ChatMessage chatMessage) {
-		final String body = gson.toJson(chatMessage);
+        @Override
+        public void connectionClosedOnError(final Exception arg0) {
+            Log.d("xmpp", "ConnectionClosedOn Error!");
+            connected = false;
 
-		if (chat == null) {
-			chat = ChatManager.getInstanceFor(connection).createChat(
-					chatMessage.getSenderJID() + "@"
-							+ serverAddress,
-					mMessageListener);
-		}
+            chat = null;
+            loggedin = false;
+        }
 
-		final Message message = new Message();
-		message.setBody(body);
-		message.setStanzaId(chatMessage.getMsgId());
-		message.setType(Message.Type.chat);
+        @Override
+        public void reconnectingIn(final int arg0) {
 
-		try {
-			if (connection.isAuthenticated()) {
-				chat.sendMessage(message);
-			} else {
-				login();
-			}
-		} catch (final SmackException.NotConnectedException exception) {
-			//TODO: Handle me
-			Log.e("xmpp.SendMessage()", "msg Not sent!-Not Connected!");
+            Log.d("xmpp", "Reconnectingin " + arg0);
 
-		} catch (final Exception exception) {
-			Log.e("xmpp.SendMessage()-Exception",
-					"msg Not sent!" + exception.getMessage());
-		}
+            loggedin = false;
+        }
 
-	}
+        @Override
+        public void reconnectionFailed(final Exception arg0) {
 
-	public class XMPPConnectionListener implements ConnectionListener {
+            Log.d("xmpp", "ReconnectionFailed!");
+            connected = false;
 
-		@Override
-		public void connected(final XMPPConnection connection) {
+            chat = null;
+            loggedin = false;
+        }
 
-			Log.d("xmpp", "Connected!");
-			connected = true;
-			if (!connection.isAuthenticated()) {
-				login();
-			}
-		}
+        @Override
+        public void reconnectionSuccessful() {
+            Log.d("xmpp", "ReconnectionSuccessful");
+            connected = true;
 
-		@Override
-		public void connectionClosed() {
-			Log.d("xmpp", "ConnectionCLosed!");
-			connected = false;
-			chat = null;
-			loggedin = false;
-		}
+            chat = null;
+            loggedin = false;
+        }
 
-		@Override
-		public void connectionClosedOnError(final Exception arg0) {
-			Log.d("xmpp", "ConnectionClosedOn Error!");
-			connected = false;
+        @Override
+        public void authenticated(final XMPPConnection arg0, final boolean arg1) {
+            Log.d("xmpp", "Authenticated!");
+            loggedin = true;
 
-			chat = null;
-			loggedin = false;
-		}
+            ChatManager.getInstanceFor(connection).addChatListener(mChatManagerListener);
+            chat = null;
+        }
+    }
 
-		@Override
-		public void reconnectingIn(final int arg0) {
+    private class MMessageListener implements ChatMessageListener {
 
-			Log.d("xmpp", "Reconnectingin " + arg0);
+        MMessageListener(final Context context) {
 
-			loggedin = false;
-		}
+        }
 
-		@Override
-		public void reconnectionFailed(final Exception arg0) {
+        @Override
+        public void processMessage(final org.jivesoftware.smack.chat.Chat chat,
+                                   final Message message) {
+            Log.i("MyXMPP_MESSAGE_LISTENER", "Xmpp message received: '"
+                    + message);
 
-			Log.d("xmpp", "ReconnectionFailed!");
-			connected = false;
+            if (message.getType() == Message.Type.chat
+                    && message.getBody() != null) {
+                final ChatMessage chatMessage = gson.fromJson(
+                        message.getBody(), ChatMessage.class);
 
-			chat = null;
-			loggedin = false;
+                processMessage(chatMessage);
+            }
+        }
 
-		}
-
-		@Override
-		public void reconnectionSuccessful() {
-			Log.d("xmpp", "ReconnectionSuccessful");
-			connected = true;
-
-			chat = null;
-			loggedin = false;
-		}
-
-		@Override
-		public void authenticated(final XMPPConnection arg0, final boolean arg1) {
-			Log.d("xmpp", "Authenticated!");
-			loggedin = true;
-
-			ChatManager.getInstanceFor(connection).addChatListener(mChatManagerListener);
-			chat = null;
-		}
-	}
-
-	private class MMessageListener implements ChatMessageListener {
-
-		MMessageListener(final Context context) {
-
-		}
-
-		@Override
-		public void processMessage(final org.jivesoftware.smack.chat.Chat chat,
-								   final Message message) {
-			Log.i("MyXMPP_MESSAGE_LISTENER", "Xmpp message received: '"
-					+ message);
-
-			if (message.getType() == Message.Type.chat
-					&& message.getBody() != null) {
-				final ChatMessage chatMessage = gson.fromJson(
-						message.getBody(), ChatMessage.class);
-
-				processMessage(chatMessage);
-			}
-		}
-
-		private void processMessage(final ChatMessage chatMessage) {
-
-		}
-
-	}
+        private void processMessage(final ChatMessage chatMessage) {
+            messageConsumer.consume(chatMessage);
+        }
+    }
 }

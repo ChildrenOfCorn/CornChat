@@ -3,9 +3,10 @@ package ru.cft.chuldrenofcorn.cornchat.presenter;
 import android.content.Context;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
-import ru.cft.chuldrenofcorn.cornchat.dto.ChatMessage;
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 /**
  * Created by azhukov on 26/08/16.
@@ -29,7 +30,7 @@ public class ChatPresenter {
     }
 
     public void sendMessage(final String messageText) {
-        messages.add(new ChatMessage("vasya", messageText, "4.20", true));
+        messages.add(new ChatMessage("vasya", messageText, new Date(), true));
         chatAdapter.setMessages(messages);
     }
 }
