@@ -10,6 +10,7 @@ import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.chat.ChatManagerListener;
 import org.jivesoftware.smack.chat.ChatMessageListener;
@@ -34,13 +35,14 @@ public class XmppManager {
 	private static boolean connected = false;
 	private boolean loggedin = false;
 	private boolean isConnecting = false;
-	private boolean chatCreated;
 	private XMPPTCPConnection connection;
 	private String loginUser;
 	private String loginPassword;
+	private String serverAddress;
 	private Gson gson;
 	private ChatService context;
 	private static XmppManager instance = null;
+	private Chat chat;
 
 	public XmppManager(final ChatService context,
 					   final String serverAdress,
@@ -49,6 +51,7 @@ public class XmppManager {
 					   final String loginPassword) {
 		this.loginUser = loginUser;
 		this.loginPassword = loginPassword;
+		this.serverAddress = serverAdress;
 		gson = new Gson();
 		mMessageListener = new MMessageListener(context);
 		mChatManagerListener = new ChatManagerListenerImpl();
@@ -184,36 +187,34 @@ public class XmppManager {
 	}
 
 	public void sendMessage(final ChatMessage chatMessage) {
-//		final String body = gson.toJson(chatMessage);
-//
-//		if (!chatCreated) {
-//			Mychat = ChatManager.getInstanceFor(connection).createChat(
-//					chatMessage.receiver + "@"
-//							+ context.getString(R.string.server),
-//					mMessageListener);
-//			chatCreated = true;
-//		}
-//		final Message message = new Message();
-//		message.setBody(body);
-//		message.setStanzaId(chatMessage.msgid);
-//		message.setType(Message.Type.chat);
-//
-//		try {
-//			if (connection.isAuthenticated()) {
-//
-//				Mychat.sendMessage(message);
-//
-//			} else {
-//
-//				login();
-//			}
-//		} catch (NotConnectedException e) {
-//			Log.e("xmpp.SendMessage()", "msg Not sent!-Not Connected!");
-//
-//		} catch (Exception e) {
-//			Log.e("xmpp.SendMessage()-Exception",
-//					"msg Not sent!" + e.getMessage());
-//		}
+		final String body = gson.toJson(chatMessage);
+
+		if (chat == null) {
+			chat = ChatManager.getInstanceFor(connection).createChat(
+					chatMessage.getSenderJID() + "@"
+							+ serverAddress,
+					mMessageListener);
+		}
+
+		final Message message = new Message();
+		message.setBody(body);
+		message.setStanzaId(chatMessage.getMsgId());
+		message.setType(Message.Type.chat);
+
+		try {
+			if (connection.isAuthenticated()) {
+				chat.sendMessage(message);
+			} else {
+				login();
+			}
+		} catch (final SmackException.NotConnectedException exception) {
+			//TODO: Handle me
+			Log.e("xmpp.SendMessage()", "msg Not sent!-Not Connected!");
+
+		} catch (final Exception exception) {
+			Log.e("xmpp.SendMessage()-Exception",
+					"msg Not sent!" + exception.getMessage());
+		}
 
 	}
 
@@ -233,7 +234,7 @@ public class XmppManager {
 		public void connectionClosed() {
 			Log.d("xmpp", "ConnectionCLosed!");
 			connected = false;
-			chatCreated = false;
+			chat = null;
 			loggedin = false;
 		}
 
@@ -242,7 +243,7 @@ public class XmppManager {
 			Log.d("xmpp", "ConnectionClosedOn Error!");
 			connected = false;
 
-			chatCreated = false;
+			chat = null;
 			loggedin = false;
 		}
 
@@ -260,7 +261,7 @@ public class XmppManager {
 			Log.d("xmpp", "ReconnectionFailed!");
 			connected = false;
 
-			chatCreated = false;
+			chat = null;
 			loggedin = false;
 
 		}
@@ -270,7 +271,7 @@ public class XmppManager {
 			Log.d("xmpp", "ReconnectionSuccessful");
 			connected = true;
 
-			chatCreated = false;
+			chat = null;
 			loggedin = false;
 		}
 
@@ -280,7 +281,7 @@ public class XmppManager {
 			loggedin = true;
 
 			ChatManager.getInstanceFor(connection).addChatListener(mChatManagerListener);
-			chatCreated = false;
+			chat = null;
 		}
 	}
 
@@ -307,16 +308,6 @@ public class XmppManager {
 
 		private void processMessage(final ChatMessage chatMessage) {
 
-			chatMessage.setLocal(false);
-//			Chats.chatlist.add(chatMessage);
-//			new Handler(Looper.getMainLooper()).post(new Runnable() {
-//
-//				@Override
-//				public void run() {
-//					Chats.chatAdapter.notifyDataSetChanged();
-//
-//				}
-//			});
 		}
 
 	}
