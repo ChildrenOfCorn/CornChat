@@ -12,7 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import ru.cft.chuldrenofcorn.cornchat.R;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
+import ru.cft.chuldrenofcorn.cornchat.util.DateUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,17 +64,18 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         private ImageView imageViewAvatar;
 
         public void bind(final ChatMessage chatMessage) {
-            textViewName.setText(chatMessage.getSenderName());
-            textViewMessage.setText(chatMessage.getText());
-            textViewDate.setText(/*TODO: format date */ "todo: parse me");
+            textViewName.setText(chatMessage.getServiceUserName());
+            textViewMessage.setText(chatMessage.getPayload());
+            textViewDate.setText(DateUtils.getSendMessageDate(chatMessage.getDate().getTime()));
 
             final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-            if (chatMessage.isLocal()) {
+            //TODO Определить как будет определяться тип отправителя
+            if (true) {
                 bubbleLinearLayout.setBackgroundResource(R.drawable.ic_outcoming);
                 containerLinearLayout.setGravity(Gravity.END);
 
-                textViewName.setText(chatMessage.getSenderName());
+                textViewName.setText(chatMessage.getServiceUserName());
 
                 textViewName.setTextColor(context.getResources().getColor(R.color.primaryLight));
                 textViewDate.setTextColor(context.getResources().getColor(R.color.primaryLight));
@@ -86,7 +89,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 bubbleLinearLayout.setBackgroundResource(R.drawable.ic_incoming);
                 containerLinearLayout.setGravity(Gravity.START);
 
-                textViewName.setText(chatMessage.getSenderName());
+                textViewName.setText(chatMessage.getServiceUserName());
 
                 textViewName.setTextColor(context.getResources().getColor(R.color.primaryDark));
                 textViewDate.setTextColor(context.getResources().getColor(R.color.primaryDark));
