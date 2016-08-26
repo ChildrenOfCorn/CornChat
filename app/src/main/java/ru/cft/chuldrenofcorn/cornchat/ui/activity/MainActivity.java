@@ -11,8 +11,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+
 import ru.cft.chuldrenofcorn.cornchat.R;
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
 import ru.cft.chuldrenofcorn.cornchat.presenter.ChatPresenter;
@@ -79,16 +81,33 @@ public class MainActivity extends AppCompatActivity {
 
 		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
 		linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
 		recyclerViewMessages.setLayoutManager(linearLayoutManager);
 		recyclerViewMessages.setAdapter(presenter.getChatAdapter());
 
-		imageButtonSend.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View view) {
-				if (!editTextMessage.getText().toString().isEmpty()) {
-					presenter.sendMessage(editTextMessage.getText().toString());
-				}
-			}
-		});
-	}
+        recyclerViewMessages.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(final RecyclerView recyclerView, final int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                Log.d(TAG, "onScrollStateChanged()");
+                View view = MainActivity.this.getCurrentFocus();
+                if (view != null) {
+                    InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+
+            }
+        });
+
+        imageButtonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                if (!editTextMessage.getText().toString().isEmpty()) {
+                    presenter.sendMessage(editTextMessage.getText().toString());
+                    editTextMessage.setText("");
+                }
+            }
+        });
+    }
 }
