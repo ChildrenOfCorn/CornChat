@@ -1,45 +1,34 @@
-package ru.cft.chuldrenofcorn.cornchat.data.models;
+package ru.cft.chuldrenofcorn.cornchat.dto;
 
-import android.renderscript.Element;
-
-import java.util.Date;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Created by azhukov on 26/08/16.
+ * User: azhukov
+ * Date: 26.08.2016
+ * Time: 14:35
  */
 @DatabaseTable(tableName = "chatMessages")
 public class ChatMessage {
 
-    public static final String ID = "id";
-    public static final String DATE = "date";
-    @DatabaseField(canBeNull = false, dataType = Element.DataType.INTEGER, columnName = ID, id = true)
-    private int id;
+    @Getter @Setter private String senderName;
+    @Getter @Setter private String text;
+    @Getter @Setter private String date;
+    @Getter @Setter private boolean isLocal; //если true - сообщение написал пользователь, если false - пришло из вне
 
-    private String senderName;
-    private String text;
-    @DatabaseField(canBeNull = true, dataType = Element.DataType.DATE, columnName = DATE)
-    private Date date;
-
-    public ChatMessage(final String senderName, final String text, final Date date) {
+    public ChatMessage(final String senderName, final String text, final String date) {
         this.senderName = senderName;
         this.text = text;
         this.date = date;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public String getDate() {
-        return date;
+        this.isLocal = isLocal;
     }
 
     @Override
     public String toString() {
         return text;
+    }
+
+    public boolean isLocal() {
+        return isLocal;
     }
 }
