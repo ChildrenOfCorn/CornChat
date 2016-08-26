@@ -9,7 +9,9 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+
 import com.arellomobile.mvp.presenter.InjectPresenter;
+
 import ru.cft.chuldrenofcorn.cornchat.R;
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
@@ -21,62 +23,56 @@ import java.util.List;
 
 public class MainActivity extends BaseActivity implements ChatView {
 
-	private static final String TAG = "MainActivity";
+    private static final String TAG = MainActivity.class.getSimpleName();
 
-	@InjectPresenter
-	ChatPresenter presenter;
+    @InjectPresenter
+    ChatPresenter presenter;
 
-	private ChatAdapter adapter;
+    private ChatAdapter adapter;
 
-	@Override
-	protected void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		initViews();
-	}
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        initViews();
+    }
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-	}
+    private void initViews() {
+        final ImageButton imageButtonSend = (ImageButton) findViewById(R.id.imageButtonSend);
+        final EditText editTextMessage = (EditText) findViewById(R.id.editTextMessage);
+        final RecyclerView recyclerViewMessages = (RecyclerView) findViewById(R.id.recyclerViewMessages);
 
-	private void initViews() {
-		final ImageButton imageButtonSend = (ImageButton) findViewById(R.id.imageButtonSend);
-		final EditText editTextMessage = (EditText) findViewById(R.id.editTextMessage);
-		final RecyclerView recyclerViewMessages = (RecyclerView) findViewById(R.id.recyclerViewMessages);
+        adapter = new ChatAdapter(this);
+        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerViewMessages.setLayoutManager(linearLayoutManager);
+        recyclerViewMessages.setAdapter(adapter);
 
-		adapter = new ChatAdapter(this);
-		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-		linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-		recyclerViewMessages.setLayoutManager(linearLayoutManager);
-		recyclerViewMessages.setAdapter(adapter);
+        recyclerViewMessages.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(final RecyclerView recyclerView, final int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                Log.d(TAG, "onScrollStateChanged()");
+                final View view = MainActivity.this.getCurrentFocus();
+                if (view != null) {
+                    final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+            }
+        });
 
-		recyclerViewMessages.addOnScrollListener(new RecyclerView.OnScrollListener() {
-			@Override
-			public void onScrollStateChanged(final RecyclerView recyclerView, final int newState) {
-				super.onScrollStateChanged(recyclerView, newState);
-				Log.d(TAG, "onScrollStateChanged()");
-				final View view = MainActivity.this.getCurrentFocus();
-				if (view != null) {
-					final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-				}
+        imageButtonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                if (!editTextMessage.getText().toString().isEmpty()) {
+                    presenter.sendMessage(editTextMessage.getText().toString());
+                }
+            }
+        });
+    }
 
-			}
-		});
-
-		imageButtonSend.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View view) {
-				if (!editTextMessage.getText().toString().isEmpty()) {
-					presenter.sendMessage(editTextMessage.getText().toString());
-				}
-			}
-		});
-	}
-
-	@Override
-	public void onDataReady(final List<ChatMessage> messages) {
-		adapter.setMessages(messages);
-	}
+    @Override
+    public void onDataReady(final List<ChatMessage> messages) {
+        adapter.setMessages(messages);
+    }
 }

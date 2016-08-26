@@ -42,7 +42,7 @@ public class ChatMessage {
 
     private int messageType;
 
-    @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = SERVICE_NAME)
+    @DatabaseField(dataType = DataType.STRING, columnName = SERVICE_NAME)
     @Getter
     @Setter
     //TODO: Remove setter
@@ -53,7 +53,7 @@ public class ChatMessage {
     private String senderId;
 
     //Может быть null если отправителем является юзер
-    @DatabaseField(canBeNull = true, dataType = DataType.STRING, columnName = RECEIVER_ID)
+    @DatabaseField(dataType = DataType.STRING, columnName = RECEIVER_ID)
     @Getter
     private String receiverId;
 
