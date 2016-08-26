@@ -1,17 +1,15 @@
 package ru.cft.chuldrenofcorn.cornchat.data.db;
 
 import android.util.Log;
-
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 import java.sql.SQLException;
 import java.util.List;
-
-import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 /**
  * Created by grishberg on 26.08.16.
@@ -101,14 +99,14 @@ public class ChatMessageDao {
 
         try {
             final QueryBuilder<ChatMessage, Integer> queryBuilder = dao.queryBuilder()
-                    .orderBy(ChatMessage.DATE, true);
+                    .orderBy(ChatMessage.DATE, false);
 
             final Where where = queryBuilder.where();
             where.eq(ChatMessage.USER_ID, userId);
 
             final PreparedQuery<ChatMessage> preparedQuery = queryBuilder.prepare();
             list = dao.query(preparedQuery);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             Log.e(TAG, "getMessagesByUserId: ", e);
         }
         return list;

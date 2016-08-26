@@ -15,7 +15,6 @@ import ru.cft.chuldrenofcorn.cornchat.common.Config;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 import ru.cft.chuldrenofcorn.cornchat.util.DateUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 

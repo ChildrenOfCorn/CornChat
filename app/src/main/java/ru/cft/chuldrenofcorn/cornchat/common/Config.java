@@ -7,8 +7,8 @@ package ru.cft.chuldrenofcorn.cornchat.common;
  */
 //TODO: Remove me
 public final class Config {
-	public static final String USER_EAN = "operator02";
+//	public static final String USER_EAN = "operator02";
 	public static final String OPERATOR_ID = "operator01";
 	public static final String SERVER_HOST = "andrey-laptop";
-//	public static final String USER_EAN ="2960291738335";
+	public static final String USER_EAN ="2960291738335";
 }

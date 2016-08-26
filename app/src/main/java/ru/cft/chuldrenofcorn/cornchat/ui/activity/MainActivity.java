@@ -45,6 +45,7 @@ public class MainActivity extends BaseActivity implements ChatView {
         adapter = new ChatAdapter(this);
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        linearLayoutManager.setReverseLayout(true);
         recyclerViewMessages.setLayoutManager(linearLayoutManager);
         recyclerViewMessages.setAdapter(adapter);
 
