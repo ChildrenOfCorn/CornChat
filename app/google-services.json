@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "828693536901",
+    "firebase_url": "https://jukovtest.firebaseio.com",
+    "project_id": "jukovtest",
+    "storage_bucket": "jukovtest.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:828693536901:android:abdd38fd49e91dd9",
+        "android_client_info": {
+          "package_name": "ru.cft.chuldrenofcorn.cornchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "828693536901-0f704ro85bcd87rjk3tbo3hbj2b3k4fo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRxGQ8tdDf-DmjEh-Kr6yXA0HMtljduyw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

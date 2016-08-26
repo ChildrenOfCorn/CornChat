@@ -7,6 +7,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ru.cft.chuldrenofcorn.cornchat.R;
@@ -58,6 +59,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         private TextView textViewName;
         private TextView textViewMessage;
         private TextView textViewDate;
+        private ImageView imageViewAvatar;
 
         public void bind(final ChatMessage chatMessage) {
             textViewName.setText(chatMessage.getSenderName());
@@ -68,6 +70,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
             if (chatMessage.isLocal()) {
                 bubbleLinearLayout.setBackgroundResource(R.drawable.ic_outcoming);
+                containerLinearLayout.setGravity(Gravity.END);
 
                 textViewName.setText(chatMessage.getSenderName());
 
@@ -78,9 +81,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 layoutParams.gravity = Gravity.END;
                 textViewDate.setLayoutParams(layoutParams);
 
-                containerLinearLayout.setGravity(Gravity.END);
+                imageViewAvatar.setVisibility(View.GONE);
             } else {
                 bubbleLinearLayout.setBackgroundResource(R.drawable.ic_incoming);
+                containerLinearLayout.setGravity(Gravity.START);
 
                 textViewName.setText(chatMessage.getSenderName());
 
@@ -91,7 +95,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 layoutParams.gravity = Gravity.START;
                 textViewDate.setLayoutParams(layoutParams);
 
-                containerLinearLayout.setGravity(Gravity.START);
+                imageViewAvatar.setVisibility(View.VISIBLE);
             }
         }
 
@@ -100,6 +104,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             textViewName = (TextView) itemView.findViewById(R.id.textViewName);
             textViewMessage = (TextView) itemView.findViewById(R.id.textViewMessage);
             textViewDate = (TextView) itemView.findViewById(R.id.textViewDate);
+            imageViewAvatar = (ImageView) itemView.findViewById(R.id.imageViewAvatar);
 
             containerLinearLayout = (LinearLayout) itemView.findViewById(R.id.linearLayoutMessageContainer);
             bubbleLinearLayout = (LinearLayout) itemView.findViewById(R.id.linearLayoutBubble);
