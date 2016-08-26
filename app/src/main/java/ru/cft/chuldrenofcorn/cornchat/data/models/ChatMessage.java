@@ -24,6 +24,9 @@ public class ChatMessage {
     public static final String DATE = "date";
     public static final String IS_LOCAL = "isLocal";
 
+    //Message format:
+    //"Date":"8 Jul 2016","Time":"0:40p.m.","body":" vhklv","isMine":true,"msgid":"909-08","receiver":"rajesh2","sender":"rajesh1","senderName":"rajesh1"
+
     @DatabaseField(canBeNull = false, dataType = DataType.INTEGER, columnName = ID, id = true)
     @Getter
     @Setter

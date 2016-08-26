@@ -12,61 +12,68 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.util.Log;
-
-import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
+import lombok.Getter;
+import org.jivesoftware.smack.packet.Message;
 
 public class ChatService extends Service {
-    private static final String TAG = ChatService.class.getSimpleName();
 
-    private static final String DOMAIN = "172.29.62.65";
-    private static final String USERNAME = "2960291738335";
-    private static final String PASSWORD = "1";
-    private static final int PORT = 5222;
-    private static ConnectivityManager cm;
-    private static XmppManager xmpp;
-    private String text = "";
 
-    private final MessageConsumer consumerStub = new MessageConsumer() {
+	private static final String DOMAIN = "172.29.62.65";
+	//    private static final String USERNAME = "2960291738335";
+	private static final String USERNAME = "operator02";
+	private static final String PASSWORD = "1";
+	private static final int PORT = 5222;
+	private static ConnectivityManager cm;
+	private static XmppManager xmpp;
+	private String text = "";
 
-        @Override
-        public void consume(final ChatMessage message) {
-            Log.d(TAG, "New message: " + message.getText());
-        }
-    };
+	private static final String TAG = ChatService.class.getSimpleName();
 
-    @Override
-    public IBinder onBind(final Intent intent) {
-        return new LocalBinder<ChatService>(this);
-    }
+	@Getter private MessageConsumer messageConsumer = new MessageConsumer() {
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d(TAG, "onCreate: ");
-        cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, USERNAME, PASSWORD, consumerStub);
-        xmpp.connect("onCreate");
-    }
+		@Override
+		public void consume(final Message message) {
+			Log.d(TAG, "New message: " + message.getBody());
+		}
+	};
 
-    @Override
-    public int onStartCommand(final Intent intent, final int flags,
-                              final int startId) {
-        Log.d(TAG, "onStartCommand: ");
-        return Service.START_NOT_STICKY;
-    }
+	@Override
+	public IBinder onBind(final Intent intent) {
+		return new LocalBinder<ChatService>(this);
+	}
 
-    @Override
-    public boolean onUnbind(final Intent intent) {
-        return super.onUnbind(intent);
-    }
+	public void setMessageConsumer(final MessageConsumer consumer) {
+		messageConsumer = consumer;
+	}
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        xmpp.disconnect();
-    }
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		Log.d(TAG, "onCreate: ");
+		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, USERNAME, PASSWORD, messageConsumer);
+		xmpp.connect("onCreate");
+	}
 
-    public static boolean isNetworkConnected() {
-        return cm.getActiveNetworkInfo() != null;
-    }
+	@Override
+	public int onStartCommand(final Intent intent, final int flags,
+							  final int startId) {
+		Log.d(TAG, "onStartCommand: ");
+		return Service.START_NOT_STICKY;
+	}
+
+	@Override
+	public boolean onUnbind(final Intent intent) {
+		return super.onUnbind(intent);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		xmpp.disconnect();
+	}
+
+	public static boolean isNetworkConnected() {
+		return cm.getActiveNetworkInfo() != null;
+	}
 }

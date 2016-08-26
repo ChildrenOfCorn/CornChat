@@ -3,9 +3,7 @@ package ru.cft.chuldrenofcorn.cornchat.xmpp;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-
 import com.google.gson.Gson;
-
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SASLAuthentication;
@@ -23,10 +21,9 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager.AutoReceiptMode;
 import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 import java.io.IOException;
-
-import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 /**
  * User: asmoljak
@@ -295,15 +292,8 @@ public class XmppManager {
 
             if (message.getType() == Message.Type.chat
                     && message.getBody() != null) {
-                final ChatMessage chatMessage = gson.fromJson(
-                        message.getBody(), ChatMessage.class);
-
-                processMessage(chatMessage);
+                messageConsumer.consume(message);
             }
-        }
-
-        private void processMessage(final ChatMessage chatMessage) {
-            messageConsumer.consume(chatMessage);
         }
     }
 }

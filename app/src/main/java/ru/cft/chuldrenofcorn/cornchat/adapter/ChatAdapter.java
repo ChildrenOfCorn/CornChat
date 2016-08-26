@@ -9,15 +9,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import ru.cft.chuldrenofcorn.cornchat.R;
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.cft.chuldrenofcorn.cornchat.R;
-import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
-
 /**
- * Created by azhukov on 26/08/16.
+ * User: azhukov
+ * Date: 26.08.2016
+ * Time: 21:05
  */
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
@@ -30,7 +31,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     @Override
     public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_chat, parent, false);
+        final View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_chat, parent, false);
         return new ViewHolder(v);
     }
 
