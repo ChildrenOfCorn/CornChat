@@ -12,8 +12,10 @@ import lombok.Setter;
 public class ChatMessage {
 
     @Getter @Setter private String senderName;
+    @Getter @Setter private String senderJID;
     @Getter @Setter private String text;
     @Getter @Setter private String date;
+    @Getter @Setter private String msgId;
     @Getter @Setter private boolean isLocal; //если true - сообщение написал пользователь, если false - пришло из вне
 
     public ChatMessage(final String senderName, final String text, final String date) {
