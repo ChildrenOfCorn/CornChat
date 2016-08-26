@@ -24,6 +24,7 @@ import org.jivesoftware.smackx.receipts.DeliveryReceiptManager.AutoReceiptMode;
 import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
 
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * User: asmoljak
@@ -37,10 +38,12 @@ public class XmppManager {
     private boolean loggedin = false;
     private boolean isConnecting = false;
     private XMPPTCPConnection connection;
-    private String loginUser;
-    private String loginPassword;
-    private String serverAddress;
-    private Gson gson;
+    private final String loginUser;
+    private final String loginPassword;
+    private final String operatorId;
+    private final String serverAddress;
+    private final String serverHost;
+    private final Gson gson;
     private ChatService context;
     private static XmppManager instance = null;
     private Chat chat;
@@ -49,31 +52,22 @@ public class XmppManager {
     public XmppManager(final ChatService context,
                        final String serverAdress,
                        final int serverPort,
+                       final String serverHost,
                        final String loginUser,
                        final String loginPassword,
+                       final String operatorId,
                        final MessageConsumer consumer) {
 
         this.loginUser = loginUser;
         this.loginPassword = loginPassword;
         this.serverAddress = serverAdress;
         this.messageConsumer = consumer;
+        this.operatorId = operatorId;
+        this.serverHost = serverHost;
         gson = new Gson();
         mMessageListener = new MMessageListener(context);
         mChatManagerListener = new ChatManagerListenerImpl();
         initialiseConnection(serverAdress, serverPort);
-    }
-
-    public static XmppManager getInstance(final ChatService context,
-                                          final String server,
-                                          final int port,
-                                          final String user,
-                                          final String pass,
-                                          final MessageConsumer consumer) {
-
-        if (instance == null) {
-            instance = new XmppManager(context, server, port, user, pass, consumer);
-        }
-        return instance;
     }
 
     private ChatManagerListenerImpl mChatManagerListener;
@@ -183,19 +177,19 @@ public class XmppManager {
         }
     }
 
-    public void sendMessage(@NonNull final String payload, @NonNull final String userId) {
+    public void sendMessage(@NonNull final String payload) {
 
         if (chat == null) {
             chat = ChatManager.getInstanceFor(connection).createChat(
-                    userId + "@"
-                            + serverAddress,
+                     operatorId + "@" + serverHost,
                     mMessageListener);
+
         }
 
         final Message message = new Message();
         message.setBody(payload);
         //TODO: use real id
-        message.setStanzaId(null);
+        message.setStanzaId(new Date().toString());
         message.setType(Message.Type.chat);
 
         try {
@@ -289,6 +283,7 @@ public class XmppManager {
                                    final Message message) {
             Log.i("MyXMPP_MESSAGE_LISTENER", "Xmpp message received: '"
                     + message);
+            XmppManager.this.chat = chat;
 
             if (message.getType() == Message.Type.chat
                     && message.getBody() != null) {
