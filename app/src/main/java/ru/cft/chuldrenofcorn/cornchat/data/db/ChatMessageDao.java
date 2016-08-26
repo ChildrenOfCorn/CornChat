@@ -15,6 +15,7 @@ import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 /**
  * Created by grishberg on 26.08.16.
+ * Класс для работы с бд
  */
 public class ChatMessageDao {
     private static final String TAG = ChatMessageDao.class.getSimpleName();
@@ -27,6 +28,7 @@ public class ChatMessageDao {
 
     public boolean add(ChatMessage message, String userId) {
         try {
+            message.setUserId(userId);
             dao.createOrUpdate(message);
             return true;
         } catch (SQLException e) {
