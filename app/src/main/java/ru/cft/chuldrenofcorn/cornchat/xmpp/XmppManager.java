@@ -43,15 +43,19 @@ public class XmppManager {
 	private ChatService context;
 	private static XmppManager instance = null;
 	private Chat chat;
+	private MessageConsumer messageConsumer;
 
 	public XmppManager(final ChatService context,
 					   final String serverAdress,
 					   final int serverPort,
 					   final String loginUser,
-					   final String loginPassword) {
+					   final String loginPassword,
+					   final MessageConsumer consumer) {
+
 		this.loginUser = loginUser;
 		this.loginPassword = loginPassword;
 		this.serverAddress = serverAdress;
+		this.messageConsumer = consumer;
 		gson = new Gson();
 		mMessageListener = new MMessageListener(context);
 		mChatManagerListener = new ChatManagerListenerImpl();
@@ -62,10 +66,11 @@ public class XmppManager {
 										  final String server,
 										  final int port,
 										  final String user,
-										  final String pass) {
+										  final String pass,
+										  final MessageConsumer consumer) {
 
 		if (instance == null) {
-			instance = new XmppManager(context, server, port, user, pass);
+			instance = new XmppManager(context, server, port, user, pass, consumer);
 		}
 		return instance;
 
@@ -307,7 +312,7 @@ public class XmppManager {
 		}
 
 		private void processMessage(final ChatMessage chatMessage) {
-
+			messageConsumer.consume(chatMessage);
 		}
 
 	}

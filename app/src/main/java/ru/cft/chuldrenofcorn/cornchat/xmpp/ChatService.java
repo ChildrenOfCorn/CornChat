@@ -11,31 +11,38 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
-import org.jivesoftware.smack.chat.Chat;
+import android.util.Log;
+import ru.cft.chuldrenofcorn.cornchat.dto.ChatMessage;
 
 public class ChatService extends Service {
 	private static final String DOMAIN = "172.29.62.65";
 	private static final String USERNAME = "2960291738335";
 	private static final String PASSWORD = "1";
 	private static final int PORT = 5222;
-	public static ConnectivityManager cm;
-	public static XmppManager xmpp;
-	public static boolean ServerchatCreated = false;
+	private static ConnectivityManager cm;
+	private static XmppManager xmpp;
 	private String text = "";
 
+	private static final String TAG = "cornchat.xmpp.ChatService";
+
+	private final MessageConsumer consumerStub = new MessageConsumer() {
+
+		@Override
+		public void consume(final ChatMessage message) {
+			Log.e(TAG, "New message: "+message.getText());
+		}
+	};
 
 	@Override
 	public IBinder onBind(final Intent intent) {
 		return new LocalBinder<ChatService>(this);
 	}
 
-	public Chat chat;
-
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, USERNAME, PASSWORD);
+		xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, USERNAME, PASSWORD, consumerStub);
 		xmpp.connect("onCreate");
 	}
 
