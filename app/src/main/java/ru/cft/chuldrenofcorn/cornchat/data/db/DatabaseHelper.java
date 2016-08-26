@@ -4,7 +4,13 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
+import com.j256.ormlite.support.ConnectionSource;
+import com.j256.ormlite.table.TableUtils;
+
 import java.sql.SQLException;
+
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 /**
  * Created by grishberg on 26.08.16.
@@ -16,7 +22,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private static final String DATABASE_NAME = "articles.db";
 
     //с каждым увеличением версии, при нахождении в устройстве БД с предыдущей версией будет выполнен метод onUpgrade();
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 1;
 
     //ссылки на DAO соответсвующие сущностям, хранимым в БД
 
@@ -29,9 +35,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     public void onCreate(SQLiteDatabase db, ConnectionSource connectionSource) {
 
         try {
-            TableUtils.createTable(connectionSource, ChatMeddage.class);
-            TableUtils.createTable(connectionSource, ShopList.class);
-            TableUtils.createTable(connectionSource, SubscribeRequest.class);
+            TableUtils.createTable(connectionSource, ChatMessage.class);
         } catch (SQLException e) {
             Log.e(TAG, "error creating DB " + DATABASE_NAME);
             throw new RuntimeException(e);
@@ -45,9 +49,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
         try {
             //Так делают ленивые, гораздо предпочтительнее не удаляя БД аккуратно вносить изменения
-            TableUtils.dropTable(connectionSource, ShopListEntry.class, true);
-            TableUtils.dropTable(connectionSource, ShopList.class, true);
-            TableUtils.dropTable(connectionSource, SubscribeRequest.class, true);
+            TableUtils.dropTable(connectionSource, ChatMessage.class, true);
             onCreate(db, connectionSource);
         } catch (SQLException e) {
             Log.e(TAG, "error upgrading db " + DATABASE_NAME + "from ver " + oldVer, e);
