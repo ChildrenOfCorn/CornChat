@@ -101,7 +101,7 @@ public class ChatMessageDao {
 
         try {
             final QueryBuilder<ChatMessage, Integer> queryBuilder = dao.queryBuilder()
-                    .orderBy(ChatMessage.DATE, false);
+                    .orderBy(ChatMessage.DATE, true);
 
             final Where where = queryBuilder.where();
             where.eq(ChatMessage.USER_ID, userId);

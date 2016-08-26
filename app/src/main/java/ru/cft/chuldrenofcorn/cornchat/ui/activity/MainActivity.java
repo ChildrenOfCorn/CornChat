@@ -66,6 +66,7 @@ public class MainActivity extends BaseActivity implements ChatView {
             public void onClick(final View view) {
                 if (!editTextMessage.getText().toString().isEmpty()) {
                     presenter.sendMessage(editTextMessage.getText().toString());
+                    editTextMessage.setText("");
                 }
             }
         });
