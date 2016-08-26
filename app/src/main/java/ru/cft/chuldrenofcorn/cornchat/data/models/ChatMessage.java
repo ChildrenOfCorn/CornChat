@@ -37,8 +37,7 @@ public class ChatMessage {
     @DatabaseField(dataType = DataType.STRING, columnName = USER_ID)
     @Getter
     @Setter
-    private String getUserId;
-
+    private String userId;
 
     @DatabaseField(dataType = DataType.STRING, columnName = TEXT)
     @Getter
