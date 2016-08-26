@@ -3,11 +3,10 @@ package ru.cft.chuldrenofcorn.cornchat.adapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.SimpleAdapter;
 
 import java.util.ArrayList;
 
-import ru.cft.chuldrenofcorn.cornchat.dto.ChatMessage;
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 /**
  * Created by azhukov on 26/08/16.
