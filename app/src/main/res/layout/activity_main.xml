@@ -8,10 +8,49 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="ru.cft.chuldrenofcorn.cornchat.MainActivity">
+    tools:context=".ui.activity.MainActivity">
 
-    <TextView
+    <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"/>
+        android:id="@+id/listViewMessages"
+        android:layout_alignParentStart="true"
+        android:transcriptMode="alwaysScroll"
+        android:stackFromBottom="true"
+        android:layout_above="@+id/linearLayout"
+        android:dividerHeight="0dp"
+        android:divider="@null" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:background="@color/whiteBackground"
+        android:id="@+id/linearLayout"
+        android:paddingStart="4dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="2dp"
+        android:paddingEnd="8dp">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/editTextMessage"
+            android:hint="@string/type_here"
+            android:layout_weight="1"
+            android:maxLines="5" />
+
+        <ImageButton
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:id="@+id/imageButtonSend"
+            android:contentDescription="@string/button_send"
+            android:background="@drawable/ic_send"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="4dp" />
+    </LinearLayout>
+
 </RelativeLayout>
