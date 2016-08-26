@@ -3,12 +3,10 @@ package ru.cft.chuldrenofcorn.cornchat.data.models;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.Date;
-
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 /**
  * User: azhukov
@@ -31,9 +29,8 @@ public class ChatMessage {
 
     @DatabaseField(canBeNull = false, dataType = DataType.INTEGER, columnName = ID, id = true)
     @Getter
-    private int Id;
+    private long id;
 
-    @Getter
     private int messageType;
 
     @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = SERVICE_NAME)
@@ -44,7 +41,8 @@ public class ChatMessage {
     @Getter
     private String senderId;
 
-    @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = RECEIVER_ID)
+    //Может быть null если отправителем является юзер
+    @DatabaseField(canBeNull = true, dataType = DataType.STRING, columnName = RECEIVER_ID)
     @Getter
     private String receiverId;
 
@@ -65,8 +63,14 @@ public class ChatMessage {
         this.payload = payload;
         this.date = date;
         this.messageType = payloadType;
+        //TODO: Fix me
+        this.id = date.getTime();
     }
     public static ChatMessage buildMessage(final String senderId, final String receiverId, final String payload, final Date date) {
         return new ChatMessage(senderId, receiverId, payload, date, PAYLOAD_TYPE_MESSAGE);
+    }
+
+    public boolean isServiceMessage() {
+        return messageType == PAYLOAD_TYPE_SERVICE;
     }
 }
