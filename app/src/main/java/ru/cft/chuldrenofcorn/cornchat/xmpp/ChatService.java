@@ -1,4 +1,4 @@
-package ru.cft.chuldrenofcorn.cornchat;
+package ru.cft.chuldrenofcorn.cornchat.xmpp;
 
 /**
  * User: asmoljak

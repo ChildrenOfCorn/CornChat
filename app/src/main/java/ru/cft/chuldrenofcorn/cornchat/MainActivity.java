@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import ru.cft.chuldrenofcorn.cornchat.xmpp.ChatService;
+import ru.cft.chuldrenofcorn.cornchat.xmpp.LocalBinder;
 
 public class MainActivity extends AppCompatActivity {
 

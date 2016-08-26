@@ -1,4 +1,4 @@
-package ru.cft.chuldrenofcorn.cornchat;
+package ru.cft.chuldrenofcorn.cornchat.xmpp;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -20,6 +20,7 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager.AutoReceiptMode;
 import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
+import ru.cft.chuldrenofcorn.cornchat.dto.ChatMessage;
 
 import java.io.IOException;
 
@@ -306,7 +307,7 @@ public class XmppManager {
 
 		private void processMessage(final ChatMessage chatMessage) {
 
-			chatMessage.isMine = false;
+			chatMessage.setLocal(false);
 //			Chats.chatlist.add(chatMessage);
 //			new Handler(Looper.getMainLooper()).post(new Runnable() {
 //

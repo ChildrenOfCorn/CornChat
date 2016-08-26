@@ -1,4 +1,4 @@
-package ru.cft.chuldrenofcorn.cornchat;
+package ru.cft.chuldrenofcorn.cornchat.xmpp;
 import android.os.Binder;
 
 import java.lang.ref.WeakReference;
