@@ -20,9 +20,10 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager.AutoReceiptMode;
 import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
-import ru.cft.chuldrenofcorn.cornchat.dto.ChatMessage;
 
 import java.io.IOException;
+
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 /**
  * User: asmoljak
