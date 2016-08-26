@@ -118,7 +118,7 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
                 .flatMap(response -> {
                     // выполняется в IO потоке
                     if (isBounded) {
-                        service.sendMessage(response, getLocalId());
+                        service.sendMessage(response);
                     }
 
                     ChatMessage chatMessage = ChatMessage.buildMessage(getLocalId(), null, messageText, new Date());

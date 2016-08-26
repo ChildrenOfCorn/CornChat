@@ -13,6 +13,7 @@ import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.util.Log;
 import lombok.NonNull;
+import ru.cft.chuldrenofcorn.cornchat.common.Config;
 
 public class ChatService extends Service {
 
@@ -33,12 +34,12 @@ public class ChatService extends Service {
 
 	public void connect(final MessageConsumer consumer, final String userName) {
 		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, userName, PASSWORD, consumer);
+		xmpp = new XmppManager(ChatService.this, DOMAIN, PORT, Config.SERVER_HOST, userName, PASSWORD, Config.OPERATOR_ID, consumer);
 		xmpp.connect("onCreate");
 	}
 
-	public void sendMessage(@NonNull final String payload, @NonNull final String userId) {
-		xmpp.sendMessage(payload, userId);
+	public void sendMessage(@NonNull final String payload) {
+		xmpp.sendMessage(payload);
 	}
 
 	@Override
