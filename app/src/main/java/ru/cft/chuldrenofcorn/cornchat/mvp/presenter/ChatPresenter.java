@@ -9,6 +9,8 @@ import android.util.Log;
 
 import com.arellomobile.mvp.MvpPresenter;
 
+import org.jivesoftware.smack.packet.Message;
+
 import java.sql.SQLException;
 
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
@@ -18,11 +20,12 @@ import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 import ru.cft.chuldrenofcorn.cornchat.mvp.view.ChatView;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.ChatService;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.LocalBinder;
+import ru.cft.chuldrenofcorn.cornchat.xmpp.MessageConsumer;
 
 /**
  * Created by azhukov on 26/08/16.
  */
-public class ChatPresenter extends MvpPresenter<ChatView> {
+public class ChatPresenter extends MvpPresenter<ChatView> implements MessageConsumer {
 
     private static final String TAG = ChatPresenter.class.getSimpleName();
     private ChatMessageDao dao;
@@ -80,7 +83,22 @@ public class ChatPresenter extends MvpPresenter<ChatView> {
         }
     };
 
+    /**
+     * Сохранить сообщение в бд и отправить запрос на сервер
+     *
+     * @param messageText
+     */
     public void sendMessage(final String messageText) {
         //messages.add(new ChatMessage("vasya", messageText, new Date(), true));
+    }
+
+    /**
+     * Сохранить сообщение в бд и дернуть метод View чтоб сообщить о новых сообщениях
+     *
+     * @param message
+     */
+    @Override
+    public void consume(Message message) {
+
     }
 }
