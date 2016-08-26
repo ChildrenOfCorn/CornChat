@@ -13,7 +13,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import ru.cft.chuldrenofcorn.cornchat.R;
-import ru.cft.chuldrenofcorn.cornchat.dto.ChatMessage;
+import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 /**
  * Created by azhukov on 26/08/16.
@@ -60,7 +60,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         public void bind(final ChatMessage chatMessage) {
             textViewName.setText(chatMessage.getSenderName());
             textViewMessage.setText(chatMessage.getText());
-            textViewDate.setText(chatMessage.getDate());
+            textViewDate.setText(/*TODO: format date */ "todo: parse me");
 
             final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
