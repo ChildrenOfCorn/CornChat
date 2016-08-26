@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.arellomobile.mvp.MvpPresenter;
@@ -12,15 +13,22 @@ import com.arellomobile.mvp.MvpPresenter;
 import org.jivesoftware.smack.packet.Message;
 
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
 
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
 import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageDao;
 import ru.cft.chuldrenofcorn.cornchat.data.db.DatabaseHelper;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
+import ru.cft.chuldrenofcorn.cornchat.mvp.common.RxUtils;
 import ru.cft.chuldrenofcorn.cornchat.mvp.view.ChatView;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.ChatService;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.LocalBinder;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.MessageConsumer;
+import rx.Observable;
+import rx.Scheduler;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by azhukov on 26/08/16.
@@ -32,10 +40,12 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
 
     private ChatAdapter chatAdapter;
     private ChatService service;
+    private Context context;
     private boolean isBounded;
 
     public ChatPresenter(final Context context) {
         Log.d(TAG, "ChatPresenter: ");
+        this.context = context;
         //Инициализация БД, TODO: вынести в даггер
         DatabaseHelper databaseHelper = new DatabaseHelper(context);
         dao = null;
@@ -44,21 +54,25 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
         } catch (SQLException e) {
             Log.e(TAG, "provideNewsItemsDao: ", e);
         }
-        connectToService(context);
-        doBindService(context);
+        connectToService();
+        doBindService();
     }
 
-    private void connectToService(Context context) {
-        Intent intent = new Intent(context, ChatService.class);
-        context.startService(intent);
+    private void connectToService() {
+        context.startService(getIntent());
     }
 
-    void doBindService(Context context) {
-        context.bindService(new Intent(context, ChatService.class), connection,
+    void doBindService() {
+        context.bindService(getIntent(), connection,
                 Context.BIND_AUTO_CREATE);
     }
 
-    void doUnbindService(Context context) {
+    @NonNull
+    private Intent getIntent() {
+        return new Intent(context, ChatService.class);
+    }
+
+    void doUnbindService() {
         if (connection != null) {
             context.unbindService(connection);
         }
@@ -73,6 +87,7 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
             ChatPresenter.this.service = ((LocalBinder<ChatService>) service).getService();
             isBounded = true;
             Log.d(TAG, "onServiceConnected");
+            onBound();
         }
 
         @Override
@@ -83,13 +98,44 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
         }
     };
 
+    private void onBound() {
+        service.connect(this/* ,login*/);
+    }
+
     /**
      * Сохранить сообщение в бд и отправить запрос на сервер
      *
      * @param messageText
      */
     public void sendMessage(final String messageText) {
-        //messages.add(new ChatMessage("vasya", messageText, new Date(), true));
+        // создаем объект Observable
+        Observable<String> observable = RxUtils.wrapMessage(messageText);
+        // логика в IO потоке
+        RxUtils.wrapAsync(observable)
+                .flatMap(response -> {
+                    // выполняется в IO потоке
+                    if (isBounded) {
+                        //service.sendMessage(response, userId)
+                    }
+                    // добавить новое сообщение в бд
+                    ChatMessage chatMessage = new ChatMessage(
+                            "",
+                            response,
+                            new Date(), true);
+                    dao.add(chatMessage, getLocalId());
+                    // вернуть выборку из бд с новым сообщением
+                    return Observable.just(dao.getMessagesByUserId(getLocalId()));
+                })
+                // в UI потоке
+                .subscribe(messageList -> {
+                            Log.d(TAG, "sendMessage: received data");
+                            getViewState().onDataReady(messageList);
+                        }, exception -> {
+                            Log.e(TAG, "sendMessage: except", exception);
+                            //getViewState().onFail(exception.getMessage());
+                        }
+
+                );
     }
 
     /**
@@ -99,6 +145,52 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
      */
     @Override
     public void consume(Message message) {
+        //TODO: remove
+        String rawText = message.getBody();
 
+        // создаем объект Observable
+        Observable<String> observable = RxUtils.wrapMessage(rawText);
+        // логика в IO потоке
+        RxUtils.wrapAsync(observable)
+                .flatMap(response -> {
+                    // выполняется в IO потоке
+                    //TODO: дессериализовать в ChatMessage из
+                    // добавить новое сообщение в бд
+                    ChatMessage chatMessage = new ChatMessage(
+                            "",
+                            response,
+                            new Date(),
+                            false);
+                    dao.add(chatMessage, getLocalId());
+                    // вернуть выборку из бд с новым сообщением
+                    return Observable.just(dao.getMessagesByUserId(getLocalId()));
+                })
+                // в UI потоке
+                .subscribe(messageList -> {
+                            Log.d(TAG, "sendMessage: received data");
+                            getViewState().onDataReady(messageList);
+                        }, exception -> {
+                            Log.e(TAG, "sendMessage: except", exception);
+                            //getViewState().onFail(exception.getMessage());
+                        }
+
+                );
+    }
+
+    /**
+     * Метод остановки сервиса
+     */
+    public void shutDown() {
+        doUnbindService();
+        context.stopService(getIntent());
+    }
+
+    /**
+     * Вернет EAN текущего пользователя
+     *
+     * @return
+     */
+    private String getLocalId() {
+        return "";
     }
 }
