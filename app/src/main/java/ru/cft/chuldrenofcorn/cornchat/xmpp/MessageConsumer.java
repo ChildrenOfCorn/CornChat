@@ -1,6 +1,5 @@
 package ru.cft.chuldrenofcorn.cornchat.xmpp;
 
-import org.jivesoftware.smack.packet.Message;
 
 /**
  * User: asmoljak
@@ -8,5 +7,5 @@ import org.jivesoftware.smack.packet.Message;
  * Time: 18:34
  */
 public interface MessageConsumer {
-    void consume(final Message message);
+    void consume(final String payload);
 }

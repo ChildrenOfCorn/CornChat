@@ -22,16 +22,16 @@ public class ChatMessageDao {
 
     private final Dao<ChatMessage, Integer> dao;
 
-    public ChatMessageDao(Dao<ChatMessage, Integer> dao) {
+    public ChatMessageDao(final Dao<ChatMessage, Integer> dao) {
         this.dao = dao;
     }
 
-    public boolean add(ChatMessage message, String userId) {
+    public boolean add(final ChatMessage message, final String userId) {
         try {
             message.setUserId(userId);
             dao.createOrUpdate(message);
             return true;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             Log.e(TAG, "add: ", e);
         }
         return false;
@@ -42,30 +42,30 @@ public class ChatMessageDao {
      *
      * @return
      */
-    public boolean add(List<ChatMessage> messages, String userId) {
+    public boolean add(final List<ChatMessage> messages, final String userId) {
         try {
             // удалить старые элементы для данного листа
             deleteByUserId(userId);
             for (int i = 0; i < messages.size(); i++) {
-                ChatMessage message = messages.get(i);
+                final ChatMessage message = messages.get(i);
                 message.setUserId(userId);
                 dao.createOrUpdate(message);
             }
             return true;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             Log.e(TAG, "add: ", e);
         }
         return false;
     }
 
-    public boolean deleteByUserId(String userId) {
+    public boolean deleteByUserId(final String userId) {
         try {
-            DeleteBuilder<ChatMessage, Integer> deleteBuilder =
+            final DeleteBuilder<ChatMessage, Integer> deleteBuilder =
                     dao.deleteBuilder();
             deleteBuilder.where().eq(ChatMessage.USER_ID, userId);
             deleteBuilder.delete();
             return true;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             Log.e(TAG, "deleteByUserId: ", e);
         }
         return false;
@@ -78,20 +78,20 @@ public class ChatMessageDao {
      */
     public boolean deleteAll() {
         try {
-            DeleteBuilder<ChatMessage, Integer> deleteBuilder =
+            final DeleteBuilder<ChatMessage, Integer> deleteBuilder =
                     dao.deleteBuilder();
             deleteBuilder.delete();
             return true;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             Log.e(TAG, "deleteAll: ", e);
         }
         return false;
     }
 
-    public void delete(int messageId) {
+    public void delete(final int messageId) {
         try {
             dao.deleteById(messageId);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             Log.e(TAG, "delete: ", e);
         }
     }

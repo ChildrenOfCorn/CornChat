@@ -7,16 +7,13 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
+import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
-
-import org.jivesoftware.smack.packet.Message;
-
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-
+import com.google.gson.Gson;
+import com.j256.ormlite.dao.Dao;
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
+import ru.cft.chuldrenofcorn.cornchat.common.Config;
+import ru.cft.chuldrenofcorn.cornchat.common.MockObjectBuilder;
 import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageDao;
 import ru.cft.chuldrenofcorn.cornchat.data.db.DatabaseHelper;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
@@ -26,13 +23,16 @@ import ru.cft.chuldrenofcorn.cornchat.xmpp.ChatService;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.LocalBinder;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.MessageConsumer;
 import rx.Observable;
-import rx.Scheduler;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+
+import java.sql.SQLException;
+import java.util.Date;
 
 /**
- * Created by azhukov on 26/08/16.
+ * User: azhukov
+ * Date: 26.08.2016
+ * Time: 23:11
  */
+@InjectViewState
 public class ChatPresenter extends MvpPresenter<ChatView> implements MessageConsumer {
 
     private static final String TAG = ChatPresenter.class.getSimpleName();
@@ -43,15 +43,17 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
     private Context context;
     private boolean isBounded;
 
+    private static final Gson gson = new Gson();
+
     public ChatPresenter(final Context context) {
         Log.d(TAG, "ChatPresenter: ");
         this.context = context;
         //Инициализация БД, TODO: вынести в даггер
-        DatabaseHelper databaseHelper = new DatabaseHelper(context);
+        final DatabaseHelper databaseHelper = new DatabaseHelper(context);
         dao = null;
         try {
-            dao = new ChatMessageDao(databaseHelper.getDao(ChatMessage.class));
-        } catch (SQLException e) {
+            dao = new ChatMessageDao((Dao<ChatMessage, Integer>) databaseHelper.getDao(ChatMessage.class));
+        } catch (final SQLException e) {
             Log.e(TAG, "provideNewsItemsDao: ", e);
         }
         connectToService();
@@ -99,7 +101,7 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
     };
 
     private void onBound() {
-        service.connect(this/* ,login*/);
+        service.connect(this, getLocalId());
     }
 
     /**
@@ -109,19 +111,18 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
      */
     public void sendMessage(final String messageText) {
         // создаем объект Observable
-        Observable<String> observable = RxUtils.wrapMessage(messageText);
+        final Observable<String> observable = RxUtils.wrapMessage(messageText);
         // логика в IO потоке
         RxUtils.wrapAsync(observable)
                 .flatMap(response -> {
                     // выполняется в IO потоке
                     if (isBounded) {
-                        //service.sendMessage(response, userId)
+                        service.sendMessage(response, getLocalId());
                     }
+
+                    ChatMessage chatMessage = ChatMessage.buildMessage(getLocalId(), null, messageText, new Date());
+
                     // добавить новое сообщение в бд
-                    ChatMessage chatMessage = new ChatMessage(
-                            "",
-                            response,
-                            new Date(), true);
                     dao.add(chatMessage, getLocalId());
                     // вернуть выборку из бд с новым сообщением
                     return Observable.just(dao.getMessagesByUserId(getLocalId()));
@@ -144,29 +145,37 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
      * @param message
      */
     @Override
-    public void consume(Message message) {
+    public void consume(@lombok.NonNull final String payload) {
         //TODO: remove
-        String rawText = message.getBody();
+
 
         // создаем объект Observable
-        Observable<String> observable = RxUtils.wrapMessage(rawText);
+        final Observable<String> observable = RxUtils.wrapMessage(payload);
         // логика в IO потоке
         RxUtils.wrapAsync(observable)
                 .flatMap(response -> {
-                    // выполняется в IO потоке
-                    //TODO: дессериализовать в ChatMessage из
-                    // добавить новое сообщение в бд
-                    ChatMessage chatMessage = new ChatMessage(
-                            "",
-                            response,
-                            new Date(),
-                            false);
-                    dao.add(chatMessage, getLocalId());
+                    final ChatMessage message = MockObjectBuilder.wrap(payload);
+//                    final ChatMessage message = gson.fromJson(payload, ChatMessage.class);
+                    if (message == null) {
+                        //FIXME
+                        //throw new Exception("Failed to parse JSON object");
+                        return null;
+                    }
+
+                    if (message.isServiceMessage()) {
+                        //TODO: Handle service message
+                        return null;
+                    }
+
+                    dao.add(message, getLocalId());
                     // вернуть выборку из бд с новым сообщением
                     return Observable.just(dao.getMessagesByUserId(getLocalId()));
                 })
                 // в UI потоке
                 .subscribe(messageList -> {
+                            if (messageList == null) {
+                                return;
+                            }
                             Log.d(TAG, "sendMessage: received data");
                             getViewState().onDataReady(messageList);
                         }, exception -> {
@@ -191,6 +200,6 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
      * @return
      */
     private String getLocalId() {
-        return "";
+        return Config.USER_EAN;
     }
 }

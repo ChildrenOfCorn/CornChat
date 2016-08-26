@@ -3,4 +3,5 @@
 
     <string name="type_here">Писать здесь</string>
     <string name="button_send">Это чтобы отправлять сообщения</string>
+    <string name="user_name_chat_string">Вы</string>
 </resources>

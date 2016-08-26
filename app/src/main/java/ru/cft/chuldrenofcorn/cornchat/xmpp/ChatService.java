@@ -12,12 +12,12 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.util.Log;
+import lombok.NonNull;
 
 public class ChatService extends Service {
 
 	private static final String DOMAIN = "172.29.62.65";
-	//    private static final String USERNAME = "2960291738335";
-	private static final String USERNAME = "operator02";
+
 	private static final String PASSWORD = "1";
 	private static final int PORT = 5222;
 	private static ConnectivityManager cm;
@@ -25,18 +25,20 @@ public class ChatService extends Service {
 	private String text = "";
 
 	private static final String TAG = ChatService.class.getSimpleName();
-	private MessageConsumer messageConsumer;
 
 	@Override
 	public IBinder onBind(final Intent intent) {
 		return new LocalBinder<ChatService>(this);
 	}
 
-	public void connect(final MessageConsumer consumer) {
-		messageConsumer = consumer;
+	public void connect(final MessageConsumer consumer, final String userName) {
 		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, USERNAME, PASSWORD, messageConsumer);
+		xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, userName, PASSWORD, consumer);
 		xmpp.connect("onCreate");
+	}
+
+	public void sendMessage(@NonNull final String payload, @NonNull final String userId) {
+		xmpp.sendMessage(payload, userId);
 	}
 
 	@Override

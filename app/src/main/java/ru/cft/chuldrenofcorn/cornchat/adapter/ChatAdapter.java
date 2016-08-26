@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ru.cft.chuldrenofcorn.cornchat.R;
+import ru.cft.chuldrenofcorn.cornchat.common.Config;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 import java.util.ArrayList;
@@ -60,16 +61,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         private TextView textViewDate;
 
         public void bind(final ChatMessage chatMessage) {
-            textViewName.setText(chatMessage.getSenderName());
-            textViewMessage.setText(chatMessage.getText());
+
+            textViewMessage.setText(chatMessage.getPayload());
             textViewDate.setText(/*TODO: format date */ "todo: parse me");
 
             final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-            if (chatMessage.isLocal()) {
+            if (chatMessage.getSenderId().equals(Config.USER_EAN)) {
                 bubbleLinearLayout.setBackgroundResource(R.drawable.ic_outcoming);
 
-                textViewName.setText(chatMessage.getSenderName());
+                textViewName.setText(context.getString(R.string.user_name_chat_string));
 
                 textViewName.setTextColor(context.getResources().getColor(R.color.primaryLight));
                 textViewDate.setTextColor(context.getResources().getColor(R.color.primaryLight));
@@ -82,7 +83,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             } else {
                 bubbleLinearLayout.setBackgroundResource(R.drawable.ic_incoming);
 
-                textViewName.setText(chatMessage.getSenderName());
+                textViewName.setText(chatMessage.getServiceUserName());
 
                 textViewName.setTextColor(context.getResources().getColor(R.color.primaryDark));
                 textViewDate.setTextColor(context.getResources().getColor(R.color.primaryDark));

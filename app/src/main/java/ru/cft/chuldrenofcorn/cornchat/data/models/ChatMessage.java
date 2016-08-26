@@ -4,6 +4,7 @@ import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Date;
@@ -17,6 +18,9 @@ import java.util.Date;
 @DatabaseTable(tableName = "chatMessages")
 public class ChatMessage {
 
+    //Ean - не приходит из сети только для хранения
+    public static final String USER_ID = "user_id";
+
     public static final String ID = "id";
     public static final String SENDER_ID = "senderId";
     public static final String RECEIVER_ID = "receiverId";
@@ -27,14 +31,21 @@ public class ChatMessage {
     private static final int PAYLOAD_TYPE_MESSAGE = 100;
     private static final int PAYLOAD_TYPE_SERVICE = 101;
 
-    @DatabaseField(canBeNull = false, dataType = DataType.INTEGER, columnName = ID, id = true)
+    @DatabaseField(canBeNull = false, dataType = DataType.LONG, columnName = ID, id = true)
     @Getter
     private long id;
+
+    @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = USER_ID)
+    @Getter
+    @Setter
+    private String userId;
 
     private int messageType;
 
     @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = SERVICE_NAME)
     @Getter
+    @Setter
+    //TODO: Remove setter
     private String serviceUserName;
 
     @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = SENDER_ID)

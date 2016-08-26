@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.google.gson.Gson;
+import lombok.NonNull;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SASLAuthentication;
@@ -21,7 +22,6 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager.AutoReceiptMode;
 import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
-import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 import java.io.IOException;
 
@@ -183,19 +183,19 @@ public class XmppManager {
         }
     }
 
-    public void sendMessage(final ChatMessage chatMessage) {
-        final String body = gson.toJson(chatMessage);
+    public void sendMessage(@NonNull final String payload, @NonNull final String userId) {
 
         if (chat == null) {
             chat = ChatManager.getInstanceFor(connection).createChat(
-                    chatMessage.getUserId() + "@"
+                    userId + "@"
                             + serverAddress,
                     mMessageListener);
         }
 
         final Message message = new Message();
-        message.setBody(body);
-        message.setStanzaId(String.valueOf(chatMessage.getId()));
+        message.setBody(payload);
+        //TODO: use real id
+        message.setStanzaId(null);
         message.setType(Message.Type.chat);
 
         try {
@@ -292,7 +292,7 @@ public class XmppManager {
 
             if (message.getType() == Message.Type.chat
                     && message.getBody() != null) {
-                messageConsumer.consume(message);
+                messageConsumer.consume(message.getBody());
             }
         }
     }
