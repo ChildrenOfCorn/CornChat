@@ -16,6 +16,8 @@ import android.util.Log;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 
 public class ChatService extends Service {
+    private static final String TAG = ChatService.class.getSimpleName();
+
     private static final String DOMAIN = "172.29.62.65";
     private static final String USERNAME = "2960291738335";
     private static final String PASSWORD = "1";
@@ -23,8 +25,6 @@ public class ChatService extends Service {
     private static ConnectivityManager cm;
     private static XmppManager xmpp;
     private String text = "";
-
-    private static final String TAG = ChatService.class.getSimpleName();
 
     private final MessageConsumer consumerStub = new MessageConsumer() {
 
@@ -42,6 +42,7 @@ public class ChatService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d(TAG, "onCreate: ");
         cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, USERNAME, PASSWORD, consumerStub);
         xmpp.connect("onCreate");
@@ -50,6 +51,7 @@ public class ChatService extends Service {
     @Override
     public int onStartCommand(final Intent intent, final int flags,
                               final int startId) {
+        Log.d(TAG, "onStartCommand: ");
         return Service.START_NOT_STICKY;
     }
 

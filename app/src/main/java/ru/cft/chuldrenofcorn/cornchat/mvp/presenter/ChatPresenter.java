@@ -32,6 +32,7 @@ public class ChatPresenter extends MvpPresenter<ChatView> {
     private boolean isBounded;
 
     public ChatPresenter(final Context context) {
+        Log.d(TAG, "ChatPresenter: ");
         //Инициализация БД, TODO: вынести в даггер
         DatabaseHelper databaseHelper = new DatabaseHelper(context);
         dao = null;
@@ -50,17 +51,17 @@ public class ChatPresenter extends MvpPresenter<ChatView> {
     }
 
     void doBindService(Context context) {
-        context.bindService(new Intent(context, ChatService.class), mConnection,
+        context.bindService(new Intent(context, ChatService.class), connection,
                 Context.BIND_AUTO_CREATE);
     }
 
     void doUnbindService(Context context) {
-        if (mConnection != null) {
-            context.unbindService(mConnection);
+        if (connection != null) {
+            context.unbindService(connection);
         }
     }
 
-    private final ServiceConnection mConnection = new ServiceConnection() {
+    private final ServiceConnection connection = new ServiceConnection() {
 
         @SuppressWarnings("unchecked")
         @Override

@@ -25,7 +25,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //intentFilter = FmService.getNotificationIntentFilter();
-        intentFilter.setPriority(0);
+        //intentFilter.setPriority(0);
         getMvpDelegate().onCreate(savedInstanceState);
     }
 
@@ -87,13 +87,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(receiver, intentFilter);
+        //registerReceiver(receiver, intentFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
     }
 
     /**
