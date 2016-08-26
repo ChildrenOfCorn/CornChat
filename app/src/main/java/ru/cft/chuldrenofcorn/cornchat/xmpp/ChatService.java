@@ -12,11 +12,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.util.Log;
-import lombok.Getter;
-import org.jivesoftware.smack.packet.Message;
 
 public class ChatService extends Service {
-
 
 	private static final String DOMAIN = "172.29.62.65";
 	//    private static final String USERNAME = "2960291738335";
@@ -28,31 +25,23 @@ public class ChatService extends Service {
 	private String text = "";
 
 	private static final String TAG = ChatService.class.getSimpleName();
-
-	@Getter private MessageConsumer messageConsumer = new MessageConsumer() {
-
-		@Override
-		public void consume(final Message message) {
-			Log.d(TAG, "New message: " + message.getBody());
-		}
-	};
+	private MessageConsumer messageConsumer;
 
 	@Override
 	public IBinder onBind(final Intent intent) {
 		return new LocalBinder<ChatService>(this);
 	}
 
-	public void setMessageConsumer(final MessageConsumer consumer) {
+	public void connect(final MessageConsumer consumer) {
 		messageConsumer = consumer;
+		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, USERNAME, PASSWORD, messageConsumer);
+		xmpp.connect("onCreate");
 	}
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		Log.d(TAG, "onCreate: ");
-		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		xmpp = XmppManager.getInstance(ChatService.this, DOMAIN, PORT, USERNAME, PASSWORD, messageConsumer);
-		xmpp.connect("onCreate");
 	}
 
 	@Override
