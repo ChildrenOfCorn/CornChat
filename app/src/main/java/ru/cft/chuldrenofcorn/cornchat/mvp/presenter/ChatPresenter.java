@@ -7,27 +7,32 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
+
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.j256.ormlite.dao.Dao;
-
 import ru.cft.chuldrenofcorn.cornchat.App;
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
 import ru.cft.chuldrenofcorn.cornchat.common.Config;
-import ru.cft.chuldrenofcorn.cornchat.common.MockObjectBuilder;
 import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageDao;
+import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageRepository;
 import ru.cft.chuldrenofcorn.cornchat.data.db.DatabaseHelper;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 import ru.cft.chuldrenofcorn.cornchat.mvp.common.RxUtils;
 import ru.cft.chuldrenofcorn.cornchat.mvp.view.ChatView;
+import ru.cft.chuldrenofcorn.cornchat.ui.activity.MainActivity;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.ChatService;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.LocalBinder;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.MessageConsumer;
 import rx.Observable;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.Date;
+
+import javax.inject.Inject;
 
 /**
  * User: azhukov
@@ -38,25 +43,20 @@ import java.util.Date;
 public class ChatPresenter extends MvpPresenter<ChatView> implements MessageConsumer {
 
     private static final String TAG = ChatPresenter.class.getSimpleName();
-    private ChatMessageDao dao;
 
     private ChatAdapter chatAdapter;
     private ChatService service;
-    private Context context = App.getAppContext();
-    private boolean isBounded;
 
-    private static final Gson gson = new Gson();
+    @Inject
+    Context context;
+    @Inject
+    ChatMessageRepository repository;
+
+    private boolean isBounded;
 
     public ChatPresenter() {
         Log.d(TAG, "ChatPresenter: ");
-        //Инициализация БД, TODO: вынести в даггер
-        final DatabaseHelper databaseHelper = new DatabaseHelper(context);
-        dao = null;
-        try {
-            dao = new ChatMessageDao((Dao<ChatMessage, Integer>) databaseHelper.getDao(ChatMessage.class));
-        } catch (final SQLException e) {
-            Log.e(TAG, "provideNewsItemsDao: ", e);
-        }
+        MainActivity.getAppComponent().inject(this);
         connectToService();
         doBindService();
     }
@@ -117,15 +117,16 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
         RxUtils.wrapAsync(observable)
                 .flatMap(response -> {
                     // выполняется в IO потоке
+                    ChatMessage chatMessage = ChatMessage.buildMessage(getLocalId(), null, messageText, new Date());
                     if (isBounded) {
-                        service.sendMessage(response);
+//                        service.sendMessage(response);
+                        service.sendMessage(Config.gson.toJson(chatMessage));
                     }
 
-                    ChatMessage chatMessage = ChatMessage.buildMessage(getLocalId(), null, messageText, new Date());
                     // добавить новое сообщение в бд
-                    dao.add(chatMessage, getLocalId());
+                    repository.add(chatMessage, getLocalId());
                     // вернуть выборку из бд с новым сообщением
-                    return Observable.just(dao.getMessagesByUserId(getLocalId()));
+                    return Observable.just(repository.getMessages(getLocalId()));
                 })
                 // в UI потоке
                 .subscribe(messageList -> {
@@ -142,20 +143,18 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
     /**
      * Сохранить сообщение в бд и дернуть метод View чтоб сообщить о новых сообщениях
      *
-     * @param message
      */
     @Override
     public void consume(@lombok.NonNull final String payload) {
         //TODO: remove
-
 
         // создаем объект Observable
         final Observable<String> observable = RxUtils.wrapMessage(payload);
         // логика в IO потоке
         RxUtils.wrapAsync(observable)
                 .flatMap(response -> {
-                    final ChatMessage message = MockObjectBuilder.wrap(payload);
-//                    final ChatMessage message = gson.fromJson(payload, ChatMessage.class);
+//                    final ChatMessage message = MockObjectBuilder.wrap(payload);
+                    final ChatMessage message = Config.gson.fromJson(payload, ChatMessage.class);
                     if (message == null) {
                         //FIXME
                         //throw new Exception("Failed to parse JSON object");
@@ -167,16 +166,16 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
                         return null;
                     }
 
-                    dao.add(message, getLocalId());
+                    repository.add(message, getLocalId());
                     // вернуть выборку из бд с новым сообщением
-                    return Observable.just(dao.getMessagesByUserId(getLocalId()));
+                    return Observable.just(repository.getMessages(getLocalId()));
                 })
                 // в UI потоке
                 .subscribe(messageList -> {
                             if (messageList == null) {
                                 return;
                             }
-                            Log.d(TAG, "sendMessage: received data");
+                            Log.d(TAG, "sendMessage: received data: "+messageList.size());
                             getViewState().onDataReady(messageList);
                         }, exception -> {
                             Log.e(TAG, "sendMessage: except", exception);

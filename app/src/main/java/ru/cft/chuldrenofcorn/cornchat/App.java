@@ -2,7 +2,14 @@ package ru.cft.chuldrenofcorn.cornchat;
 
 import android.app.Application;
 import android.content.Context;
+import android.preference.PreferenceManager;
 
+import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageRepositoryArray;
+import ru.cft.chuldrenofcorn.cornchat.data.db.DatabaseHelper;
+import ru.cft.chuldrenofcorn.cornchat.injection.AppComponent;
+import ru.cft.chuldrenofcorn.cornchat.injection.AppModule;
+import ru.cft.chuldrenofcorn.cornchat.injection.DaggerAppComponent;
+import ru.cft.chuldrenofcorn.cornchat.injection.DbModule;
 import ru.cft.chuldrenofcorn.cornchat.mvp.presenter.ChatPresenter;
 
 /**
@@ -11,15 +18,8 @@ import ru.cft.chuldrenofcorn.cornchat.mvp.presenter.ChatPresenter;
 public class App extends Application {
     private static final String TAG = App.class.getSimpleName();
 
-    private static Context sContext;
-
     @Override
     public void onCreate() {
         super.onCreate();
-        sContext = getApplicationContext();
-    }
-
-    public static Context getAppContext() {
-        return sContext;
     }
 }

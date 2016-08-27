@@ -1,5 +1,6 @@
 package ru.cft.chuldrenofcorn.cornchat.ui.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,7 +15,13 @@ import com.arellomobile.mvp.presenter.InjectPresenter;
 
 import ru.cft.chuldrenofcorn.cornchat.R;
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
+import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageRepositoryArray;
+import ru.cft.chuldrenofcorn.cornchat.data.db.DatabaseHelper;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
+import ru.cft.chuldrenofcorn.cornchat.injection.AppComponent;
+import ru.cft.chuldrenofcorn.cornchat.injection.AppModule;
+import ru.cft.chuldrenofcorn.cornchat.injection.DaggerAppComponent;
+import ru.cft.chuldrenofcorn.cornchat.injection.DbModule;
 import ru.cft.chuldrenofcorn.cornchat.mvp.presenter.ChatPresenter;
 import ru.cft.chuldrenofcorn.cornchat.mvp.view.ChatView;
 import ru.cft.chuldrenofcorn.cornchat.ui.common.BaseActivity;
@@ -24,6 +31,8 @@ import java.util.List;
 public class MainActivity extends BaseActivity implements ChatView {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static AppComponent sAppComponent;
+    private static Context sContext;
 
     @InjectPresenter
     ChatPresenter presenter;
@@ -32,9 +41,33 @@ public class MainActivity extends BaseActivity implements ChatView {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        sContext = this.getApplicationContext();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
+    }
+
+    public synchronized static AppComponent getAppComponent() {
+        if (sAppComponent == null) {
+            initComponents(DaggerAppComponent
+                    .builder()
+                    .dbModule(new DbModule(
+                            new DatabaseHelper(sContext),
+                            new ChatMessageRepositoryArray()))
+                    .appModule(new AppModule(sContext))
+                    .build()
+            );
+        }
+        return sAppComponent;
+    }
+
+    /**
+     * Если будут тесты, то замокенный AppComponent передается тут
+     *
+     * @param component
+     */
+    public static void initComponents(AppComponent component) {
+        sAppComponent = component;
     }
 
     private void initViews() {
