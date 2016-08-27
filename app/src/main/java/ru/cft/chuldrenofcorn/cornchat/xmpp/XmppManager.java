@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.NonNull;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
@@ -43,7 +44,6 @@ public class XmppManager {
     private final String operatorId;
     private final String serverAddress;
     private final String serverHost;
-    private final Gson gson;
     private ChatService context;
     private static XmppManager instance = null;
     private Chat chat;
@@ -64,7 +64,6 @@ public class XmppManager {
         this.messageConsumer = consumer;
         this.operatorId = operatorId;
         this.serverHost = serverHost;
-        gson = new Gson();
         mMessageListener = new MMessageListener(context);
         mChatManagerListener = new ChatManagerListenerImpl();
         initialiseConnection(serverAdress, serverPort);
