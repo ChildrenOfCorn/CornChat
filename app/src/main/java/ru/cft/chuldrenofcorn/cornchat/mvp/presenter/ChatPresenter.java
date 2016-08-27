@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
+
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
 import com.google.gson.Gson;
@@ -17,6 +18,7 @@ import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
 import ru.cft.chuldrenofcorn.cornchat.common.Config;
 import ru.cft.chuldrenofcorn.cornchat.common.MockObjectBuilder;
 import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageDao;
+import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageRepository;
 import ru.cft.chuldrenofcorn.cornchat.data.db.DatabaseHelper;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 import ru.cft.chuldrenofcorn.cornchat.mvp.common.RxUtils;
@@ -29,6 +31,8 @@ import rx.Observable;
 import java.sql.SQLException;
 import java.util.Date;
 
+import javax.inject.Inject;
+
 /**
  * User: azhukov
  * Date: 26.08.2016
@@ -38,25 +42,22 @@ import java.util.Date;
 public class ChatPresenter extends MvpPresenter<ChatView> implements MessageConsumer {
 
     private static final String TAG = ChatPresenter.class.getSimpleName();
-    private ChatMessageDao dao;
 
     private ChatAdapter chatAdapter;
     private ChatService service;
-    private Context context = App.getAppContext();
+
+    @Inject
+    Context context;
+    @Inject
+    ChatMessageRepository repository;
+
     private boolean isBounded;
 
     private static final Gson gson = new Gson();
 
     public ChatPresenter() {
         Log.d(TAG, "ChatPresenter: ");
-        //Инициализация БД, TODO: вынести в даггер
-        final DatabaseHelper databaseHelper = new DatabaseHelper(context);
-        dao = null;
-        try {
-            dao = new ChatMessageDao((Dao<ChatMessage, Integer>) databaseHelper.getDao(ChatMessage.class));
-        } catch (final SQLException e) {
-            Log.e(TAG, "provideNewsItemsDao: ", e);
-        }
+        App.getAppComponent().inject(this);
         connectToService();
         doBindService();
     }
@@ -123,9 +124,9 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
 
                     ChatMessage chatMessage = ChatMessage.buildMessage(getLocalId(), null, messageText, new Date());
                     // добавить новое сообщение в бд
-                    dao.add(chatMessage, getLocalId());
+                    repository.add(chatMessage, getLocalId());
                     // вернуть выборку из бд с новым сообщением
-                    return Observable.just(dao.getMessagesByUserId(getLocalId()));
+                    return Observable.just(repository.getMessages(getLocalId()));
                 })
                 // в UI потоке
                 .subscribe(messageList -> {
@@ -142,12 +143,10 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
     /**
      * Сохранить сообщение в бд и дернуть метод View чтоб сообщить о новых сообщениях
      *
-     * @param message
      */
     @Override
     public void consume(@lombok.NonNull final String payload) {
         //TODO: remove
-
 
         // создаем объект Observable
         final Observable<String> observable = RxUtils.wrapMessage(payload);
@@ -167,9 +166,9 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
                         return null;
                     }
 
-                    dao.add(message, getLocalId());
+                    repository.add(message, getLocalId());
                     // вернуть выборку из бд с новым сообщением
-                    return Observable.just(dao.getMessagesByUserId(getLocalId()));
+                    return Observable.just(repository.getMessages(getLocalId()));
                 })
                 // в UI потоке
                 .subscribe(messageList -> {
