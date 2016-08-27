@@ -97,7 +97,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 textViewName.setText(chatMessage.getServiceUserName());
                 textViewName.setTextColor(context.getResources().getColor(R.color.primaryDark));
                 textViewDate.setTextColor(context.getResources().getColor(R.color.primaryDark));
-                textViewMessage.setTextColor(Color.WHITE);
+                textViewMessage.setTextColor(Color.DKGRAY);
 
                 layoutParams.gravity = Gravity.START;
                 textViewDate.setLayoutParams(layoutParams);
