@@ -14,16 +14,15 @@ import ru.cft.chuldrenofcorn.cornchat.App;
 @Module
 public class AppModule {
     private static final String TAG = AppModule.class.getSimpleName();
-    private final App app;
-
-    public AppModule(App app) {
-        this.app = app;
+    private Context context;
+    public AppModule(Context context) {
+        this.context = context;
     }
 
     @Provides
     @Singleton
     Context provideContext() {
-        return app.getApplicationContext();
+        return context;
     }
 
 }

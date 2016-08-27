@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import ru.cft.chuldrenofcorn.cornchat.App;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
+import ru.cft.chuldrenofcorn.cornchat.ui.activity.MainActivity;
 
 /**
  * Created by grishberg on 27.08.16.
@@ -17,7 +18,7 @@ public class ChatMessageRepositoryDb implements ChatMessageRepository {
     ChatMessageDao dao;
 
     public ChatMessageRepositoryDb() {
-        App.getAppComponent().inject(this);
+        MainActivity.getAppComponent().inject(this);
     }
 
     @Override

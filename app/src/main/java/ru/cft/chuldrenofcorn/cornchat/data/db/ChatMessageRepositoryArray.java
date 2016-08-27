@@ -1,6 +1,6 @@
 package ru.cft.chuldrenofcorn.cornchat.data.db;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
@@ -10,11 +10,10 @@ import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
  */
 public class ChatMessageRepositoryArray implements ChatMessageRepository {
     private static final String TAG = ChatMessageRepositoryArray.class.getSimpleName();
-    public static final int INITIAL_CAPACITY = 10;
-    private final List<ChatMessage> list;
+    private final LinkedList<ChatMessage> list;
 
     public ChatMessageRepositoryArray() {
-        list = new ArrayList<>(INITIAL_CAPACITY);
+        list = new LinkedList<>();
     }
 
     @Override
@@ -24,7 +23,7 @@ public class ChatMessageRepositoryArray implements ChatMessageRepository {
 
     @Override
     public void add(final ChatMessage message, final String userId) {
-        list.add(message);
+        list.add(0, message);
     }
 
     @Override

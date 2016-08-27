@@ -22,6 +22,7 @@ import ru.cft.chuldrenofcorn.cornchat.data.db.DatabaseHelper;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 import ru.cft.chuldrenofcorn.cornchat.mvp.common.RxUtils;
 import ru.cft.chuldrenofcorn.cornchat.mvp.view.ChatView;
+import ru.cft.chuldrenofcorn.cornchat.ui.activity.MainActivity;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.ChatService;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.LocalBinder;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.MessageConsumer;
@@ -55,7 +56,7 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
 
     public ChatPresenter() {
         Log.d(TAG, "ChatPresenter: ");
-        App.getAppComponent().inject(this);
+        MainActivity.getAppComponent().inject(this);
         connectToService();
         doBindService();
     }
