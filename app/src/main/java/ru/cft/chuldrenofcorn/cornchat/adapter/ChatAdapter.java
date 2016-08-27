@@ -70,6 +70,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
             final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
+            if (Config.isBot(chatMessage.getServiceUserName())) {
+                imageViewAvatar.setImageResource(R.drawable.bender);
+            } else {
+                imageViewAvatar.setImageResource(R.drawable.engineer);
+            }
+
             if (chatMessage.getSenderId().equals(Config.USER_EAN)) {
 
                 bubbleLinearLayout.setBackgroundResource(R.drawable.ic_outcoming);
@@ -89,7 +95,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 containerLinearLayout.setGravity(Gravity.START);
 
                 textViewName.setText(chatMessage.getServiceUserName());
-
                 textViewName.setTextColor(context.getResources().getColor(R.color.primaryDark));
                 textViewDate.setTextColor(context.getResources().getColor(R.color.primaryDark));
                 textViewMessage.setTextColor(Color.WHITE);

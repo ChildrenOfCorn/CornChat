@@ -8,7 +8,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    buildToolsVersion "23.0.0"
 
     defaultConfig {
         applicationId "ru.cft.chuldrenofcorn.cornchat"

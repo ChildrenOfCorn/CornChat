@@ -41,6 +41,11 @@ public final class Config {
 		}
 	};
 
+	public static boolean isBot(final String userName) {
+		return  "Bender".equals(userName);
+	}
+
+
 	public static final Gson gson = new GsonBuilder()
 			.registerTypeAdapter(Date.class, ser)
 			.registerTypeAdapter(Date.class, deser).create();
