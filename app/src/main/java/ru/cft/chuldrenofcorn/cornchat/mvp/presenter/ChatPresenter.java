@@ -10,12 +10,11 @@ import android.util.Log;
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.j256.ormlite.dao.Dao;
-
 import ru.cft.chuldrenofcorn.cornchat.App;
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
 import ru.cft.chuldrenofcorn.cornchat.common.Config;
-import ru.cft.chuldrenofcorn.cornchat.common.MockObjectBuilder;
 import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageDao;
 import ru.cft.chuldrenofcorn.cornchat.data.db.DatabaseHelper;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
@@ -27,6 +26,7 @@ import ru.cft.chuldrenofcorn.cornchat.xmpp.MessageConsumer;
 import rx.Observable;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.Date;
 
 /**
@@ -44,8 +44,6 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
     private ChatService service;
     private Context context = App.getAppContext();
     private boolean isBounded;
-
-    private static final Gson gson = new Gson();
 
     public ChatPresenter() {
         Log.d(TAG, "ChatPresenter: ");
@@ -117,11 +115,12 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
         RxUtils.wrapAsync(observable)
                 .flatMap(response -> {
                     // выполняется в IO потоке
+                    ChatMessage chatMessage = ChatMessage.buildMessage(getLocalId(), null, messageText, new Date());
                     if (isBounded) {
-                        service.sendMessage(response);
+//                        service.sendMessage(response);
+                        service.sendMessage(Config.gson.toJson(chatMessage));
                     }
 
-                    ChatMessage chatMessage = ChatMessage.buildMessage(getLocalId(), null, messageText, new Date());
                     // добавить новое сообщение в бд
                     dao.add(chatMessage, getLocalId());
                     // вернуть выборку из бд с новым сообщением
@@ -154,8 +153,8 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
         // логика в IO потоке
         RxUtils.wrapAsync(observable)
                 .flatMap(response -> {
-                    final ChatMessage message = MockObjectBuilder.wrap(payload);
-//                    final ChatMessage message = gson.fromJson(payload, ChatMessage.class);
+//                    final ChatMessage message = MockObjectBuilder.wrap(payload);
+                    final ChatMessage message = Config.gson.fromJson(payload, ChatMessage.class);
                     if (message == null) {
                         //FIXME
                         //throw new Exception("Failed to parse JSON object");
@@ -176,7 +175,7 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
                             if (messageList == null) {
                                 return;
                             }
-                            Log.d(TAG, "sendMessage: received data");
+                            Log.d(TAG, "sendMessage: received data: "+messageList.size());
                             getViewState().onDataReady(messageList);
                         }, exception -> {
                             Log.e(TAG, "sendMessage: except", exception);
