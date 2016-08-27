@@ -13,7 +13,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:id="@+id/imageViewAvatar"
-        android:background="#000000"
+        android:background="@drawable/engineer"
         android:layout_gravity="center_vertical"/>
 
     <LinearLayout
