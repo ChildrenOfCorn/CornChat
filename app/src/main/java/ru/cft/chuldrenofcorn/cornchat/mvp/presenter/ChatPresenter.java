@@ -10,15 +10,9 @@ import android.util.Log;
 
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.j256.ormlite.dao.Dao;
-import ru.cft.chuldrenofcorn.cornchat.App;
 import ru.cft.chuldrenofcorn.cornchat.adapter.ChatAdapter;
 import ru.cft.chuldrenofcorn.cornchat.common.Config;
-import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageDao;
 import ru.cft.chuldrenofcorn.cornchat.data.db.ChatMessageRepository;
-import ru.cft.chuldrenofcorn.cornchat.data.db.DatabaseHelper;
 import ru.cft.chuldrenofcorn.cornchat.data.models.ChatMessage;
 import ru.cft.chuldrenofcorn.cornchat.mvp.common.RxUtils;
 import ru.cft.chuldrenofcorn.cornchat.mvp.view.ChatView;
@@ -28,8 +22,6 @@ import ru.cft.chuldrenofcorn.cornchat.xmpp.LocalBinder;
 import ru.cft.chuldrenofcorn.cornchat.xmpp.MessageConsumer;
 import rx.Observable;
 
-import java.sql.SQLException;
-import java.text.DateFormat;
 import java.util.Date;
 
 import javax.inject.Inject;

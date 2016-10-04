@@ -8,7 +8,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     compileSdkVersion 24
-    buildToolsVersion "23.0.0"
+    buildToolsVersion "24.0.3"
 
     defaultConfig {
         applicationId "ru.cft.chuldrenofcorn.cornchat"
@@ -27,6 +27,7 @@ android {
 }
 
 dependencies {
+    String supportVersion = "24.2.1"
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     testCompile 'com.google.dagger:dagger:2.2'
@@ -41,8 +42,8 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.arello-mobile:moxy:0.5.2'
     compile 'com.arello-mobile:moxy-android:0.5.2'
-    compile 'com.android.support:appcompat-v7:24.1.1'
-    compile 'com.android.support:recyclerview-v7:24.1.1'
+    compile "com.android.support:appcompat-v7:$supportVersion"
+    compile "com.android.support:recyclerview-v7:$supportVersion"
     compile 'com.j256.ormlite:ormlite-core:4.48'
     compile 'com.j256.ormlite:ormlite-android:4.48'
     compile 'org.igniterealtime.smack:smack-android:4.1.6'
