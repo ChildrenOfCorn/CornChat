@@ -29,7 +29,7 @@ public class ChatService extends Service {
 
 	@Override
 	public IBinder onBind(final Intent intent) {
-		return new LocalBinder<ChatService>(this);
+		return new LocalBinder<>(this);
 	}
 
 	public void connect(final MessageConsumer consumer, final String userName) {

@@ -126,7 +126,6 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
                             getViewState().onDataReady(messageList);
                         }, exception -> {
                             Log.e(TAG, "sendMessage: except", exception);
-                            //getViewState().onFail(exception.getMessage());
                         }
 
                 );
@@ -134,7 +133,6 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
 
     /**
      * Сохранить сообщение в бд и дернуть метод View чтоб сообщить о новых сообщениях
-     *
      */
     @Override
     public void consume(@lombok.NonNull final String payload) {
@@ -145,7 +143,6 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
         // логика в IO потоке
         RxUtils.wrapAsync(observable)
                 .flatMap(response -> {
-//                    final ChatMessage message = MockObjectBuilder.wrap(payload);
                     final ChatMessage message = Config.gson.fromJson(payload, ChatMessage.class);
                     if (message == null) {
                         //FIXME
@@ -167,7 +164,7 @@ public class ChatPresenter extends MvpPresenter<ChatView> implements MessageCons
                             if (messageList == null) {
                                 return;
                             }
-                            Log.d(TAG, "sendMessage: received data: "+messageList.size());
+                            Log.d(TAG, "sendMessage: received data: " + messageList.size());
                             getViewState().onDataReady(messageList);
                         }, exception -> {
                             Log.e(TAG, "sendMessage: except", exception);
